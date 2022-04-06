@@ -1,12 +1,18 @@
 ---
 # vars file for db2_build
-#targethost: db2hadr
-#tgtdir: /db/db2_build
-#swlocaldir: /home/osboxes/project/db2_build/files
-#swtocopy: v11.1.4fp6_linuxx64_universal_fixpack.tar
-#swtype: universal
-#db2vpath: /opt/IBM/db2/11.1
-#licfile: db2ese.lic
+targethost: db2build
+tgtdir: /db/db2_build
+swlocaldir: /root/projects
+swtocopy: v11.1.4fp5_linuxx64_server_t.tar.gz
+swtype: server_t
+db2vpath: /opt/IBM/db2/11.1
+licfile: db2ese.lic
+
+## Crate instance vars.
+createinst:
+  create: yes
+  instid: db2ods1
+  fencid: db2udf
 
 ## Crate database related vars.
 createdb:

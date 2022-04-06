@@ -13,8 +13,6 @@
   become: yes
   #become_user: "{{ ansible_user }}"
 
-  vars_files:
-    - "{{ main.yml }}"
   vars:
     - dbaction: ''
     - actionon: all

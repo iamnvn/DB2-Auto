@@ -10,7 +10,8 @@ SCRIPTNAME=create_inst.sh
 ## Call commanly used functions and variables
     . /tmp/include_db2
 
-#DB2INST=$1
+DB2INST=$2
+DB2FENCID=$1
 
 log "START - ${SCRIPTNAME} execution started at $(date)"
 

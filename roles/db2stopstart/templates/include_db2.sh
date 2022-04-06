@@ -42,6 +42,7 @@ function log_roll {
     else
       touch ${LOGNAME}; chmod -f 777 ${LOGNAME}
     fi
+    find ${LOGDIR}/* -name "${LOGNAME}*" -type f -mtime +30 -exec rm -f {} \;
 }
 
 function list_dbs {

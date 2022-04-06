@@ -1,0 +1,15 @@
+---
+# tasks file for db2_upgrade
+# main script file
+
+- name: DB2 Standard build on host group - {{ targethost }}
+  hosts: "{{ targethost | default('empty_group') }}"
+  gather_facts: no
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+  vars_files:
+    - "{{ vars_db2.yml }}"
+
+  roles:
+    - db2build

@@ -1,0 +1,51 @@
+---
+# vars file for db2_build
+targethost: db2hadr
+tgtdir: /db/db2_build
+swlocaldir: /home/osboxes/project/db2_build/files
+swtocopy: v11.1.4fp6_linuxx64_universal_fixpack.tar
+swtype: universal
+db2vpath: /opt/IBM/db2/11.1
+licfile: db2ese.lic
+
+## Crate database related vars.
+createdb:
+  create: yes
+  name: TESTDB
+  datadir: /db/data
+  dbdir: /db/dbdir
+
+db2dirs:
+    - /db/home
+    - /db/db2dump
+    - /db/backups
+    - /db/activelogs
+    - /db/archivelogs
+    - /db/maint
+    - /db/maint/scripts
+    - /db/maint/logs
+    - /db/dbdir
+    - /db/data
+
+#######################################################
+##  Do not change below values until really needed   ##
+#######################################################
+
+dirstocreate:
+    - "{{ tgtdir }}"
+    - "{{ tgtdir }}/scripts"
+    - "{{ tgtdir }}/logs"
+    - "{{ tgtdir }}/binaries"
+
+scriptsdir: "{{ tgtdir }}/scripts"
+binariesdir: "{{ tgtdir }}/binaries"
+logdir: "{{ tgtdir }}/logs"
+
+scriptstocopy:
+    - stop_db2.sh
+    - create_tsamp.sh
+    - create_inst.sh
+    - create_db.sh
+    - install_db2.sh
+    - start_db2.sh
+    - "{{ licfile }}"

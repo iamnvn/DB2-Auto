@@ -1,0 +1,28 @@
+---
+# vars file for db2 restarts
+targethost: db2test
+tgtdir: /tmp
+#dbaction: start     ## stop / start / restart
+
+#pversion: JAN-2022
+
+#######################################################
+##  Do not change below values until really needed   ##
+#######################################################
+
+dirstocreate:
+    - "{{ tgtdir }}"
+    - "{{ tgtdir }}/scripts"
+    - "{{ tgtdir }}/logs"
+    - "{{ tgtdir }}/steps"
+
+scriptsdir: "{{ tgtdir }}/scripts"
+stepsdir: "{{ tgtdir }}/steps"
+
+scriptstocopy:
+    - failover.sh
+    - start_db2.sh
+    - stop_db2.sh
+    - runasdb2.sh
+    - validate_ha.sh
+    - todolist.sh

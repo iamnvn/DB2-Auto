@@ -1,0 +1,103 @@
+---
+    - debug: msg="Play_hosts={{play_hosts}}"
+      run_once: true
+
+    - name: Verify that required variables are defined
+      assert:
+        that: 
+          - "{{ item }} is defined"
+          - "{{ item }} | length > 0"
+          - "{{ item }} != None"
+        fail_msg: "{{ item }} needs to be set for the role to work. Ex: ansible-playbook db2_restarts2.yaml -e 'dbaction=stop actionon=standby'"
+        success_msg: "Required variable {{ item }} is defined"
+      loop: ['dbaction','actionon']
+
+    - name: Create - Directory Structure
+      file: path="{{ item }}" state=directory mode=0777
+      loop: "{{ dirstocreate }}"
+      tags: createdirs
+
+    - name: Copy - Comman functions and variables file
+      template: src=templates/include_db2.sh dest=/tmp/include_db2 mode=0777
+      tags: copyscripts
+
+    - name: Copy - Scrips to target node
+      copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
+      loop: "{{ scriptstocopy }}"
+      tags: copyscripts
+
+    - name: Get db2 instances
+      shell: |
+             $(/usr/local/bin/db2ls | tail  -1 | awk '{print $1"/instance/db2ilist"}') > /tmp/db2ilist.lst
+             chmod 777 /tmp/db2ilist.lst; echo "{{ dbaction }}" > /tmp/dbaction.txt; echo "{{ actionon }}" > /tmp/actionon.txt;
+             cat /tmp/db2ilist.lst
+      register: db2ilist
+      tags: always
+
+    - name: Info - Available DB2 Instances
+      debug: msg="{{ db2ilist.stdout_lines }}"
+      tags: listinst,info
+    
+    - name: Run - Validate db2 database Roles
+      shell: "sh {{ scriptsdir }}/runasdb2.sh validate_ha.sh {{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: validateroles,todos
+    
+    - name: Create - Steps to run
+      shell: "sh {{ scriptsdir }}/todolist.sh"
+      tags: todos
+
+    - name: Create - Steps to run on Standbys or Stand-Alone Servers
+      shell:
+        cmd: ls STAGE01.DB2STEP*.*.TODO | sed -e "s/\.TODO//g"
+        chdir: "{{ stepsdir }}"
+      register: todos1
+      failed_when: todos1.rc > 1
+      tags: todos,main
+
+    - name: Create - Steps to run on Primary db2 server
+      shell:
+        cmd: ls STAGE02.DB2STEP*.*.TODO | sed -e "s/\.TODO//g"
+        chdir: "{{ stepsdir }}"
+      register: todos2
+      failed_when: todos2.rc > 1
+      tags: todos,main
+
+    - name: Info - Steps to run on Standbys or Stand-alone or client db2 Server
+      debug:
+        msg: "{{ todos1.stdout }}"
+      ignore_errors: true
+      when: todos1.stdout != ''
+      tags: todos,main,info
+
+    - name: Info - Steps to run on Primary Server
+      debug:
+        msg: "{{ todos2.stdout }}"
+      ignore_errors: true
+      when: todos2.stdout != ''
+      tags: todos,main,info
+
+    - name: Run - Steps on Standbys or Stand-Alone
+      shell:
+        cmd: "if ( sh {{ item }}.TODO ); then mv {{ item }}.TODO {{ item }}.DONE; else echo \"Failed: {{ item }}.TODO\"; fi"
+        chdir: "{{ stepsdir }}"
+      loop: "{{ todos1.stdout_lines }}"
+      when: todos1.stdout != ''
+      tags: main
+
+    - name: Run - Steps on Primary
+      shell:
+        cmd: "if ( sh {{ item }}.TODO ); then mv {{ item }}.TODO {{ item }}.DONE; else echo \"Failed: {{ item }}.TODO\"; fi"
+        chdir: "{{ stepsdir }}"
+      loop: "{{ todos2.stdout_lines }}"
+      when: todos2.stdout != ''
+      tags: main
+
+    - name: Remove - Scripts from Target directory
+      file: path="{{ scriptsdir }}/{{ item }}" state=absent
+      loop: "{{ scriptstocopy }}"
+      tags: removescripts
+      
+    - file: path="{{ item }}" state=absent
+      loop: ['/tmp/dbaction.txt','/tmp/actionon.txt','/tmp/include_db2']
+      tags: removescripts

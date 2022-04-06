@@ -1,0 +1,25 @@
+    - debug: msg="Play_hosts={{play_hosts}}"
+      run_once: true
+      tags: always
+
+    - name: Run - prereq steps
+      import_tasks: pre_reqs.yaml
+      tags: prereq
+
+    - name: Run - DB2 Install on Target Server
+      shell: "sudo {{ tgtdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
+      tags: install
+
+    - name: Create - db2 instance and configure
+      script: "{{ playbook_dir }}/files/create_inst.sh"
+      tags: createinst
+
+    - name: Create - db2 database
+      script: "{{ playbook_dir }}/files/create_db.sh {{ createdb['name'] }} {{ createdb['datadir'] }} {{ createdb['dbdir'] }}"
+      when: createdb['create'] | bool
+      tags: createdb
+
+    - name: Apply - db2 license
+      shell: "$HOME/sqllib/adm/db2licm -a {{ scriptsdir }}/{{ db2lic | basename }}"
+      when: licfile is defined
+      tags: lic

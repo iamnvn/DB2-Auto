@@ -7,7 +7,7 @@
    tags: createdirs
 
  - name: Create - DB2 Related dirs.
-   file: path="{{ item }}" state=directory mode=0755
+   file: path="{{ item }}" state=directory owner="{{ createinst['instid'] }}" group="{{ createinst['instgrp'] }}" mode=0775
    loop: "{{ db2dirs }}"
    tags: createdirs
 

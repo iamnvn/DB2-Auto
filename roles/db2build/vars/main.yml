@@ -13,6 +13,7 @@ createinst:
   create: yes
   instid: db2ods1
   fencid: db2udf
+  instgrp: db2ods1
 
 ## Crate database related vars.
 createdb:

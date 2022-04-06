@@ -7,7 +7,7 @@
       tags: prereq
 
     - name: Run - DB2 Install on Target Server
-      shell: "sudo {{ tgtdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
+      shell: "{{ tgtdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
       tags: install
 
     - name: Create - db2 instance and configure

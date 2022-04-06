@@ -16,7 +16,7 @@
    tags: always
 
  - name: Copy - binaries to target nodes
-   copy: src="{{ swlocaldir }}/{{ swtocopy }}" dest="{{ binariesdir }}" mode=0755
+   copy: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
    tags: copybinaries
 
  - name: Unzip - db2binaries

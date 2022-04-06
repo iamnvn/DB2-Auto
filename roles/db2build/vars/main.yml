@@ -47,6 +47,7 @@ dirstocreate:
 scriptsdir: "{{ tgtdir }}/scripts"
 binariesdir: "{{ tgtdir }}/binaries"
 logdir: "{{ tgtdir }}/logs"
+db2sw: "{{ swlocaldir }}/{{ swtocopy }}"
 
 scriptstocopy:
     - stop_db2.sh

@@ -11,7 +11,8 @@
       tags: install
 
     - name: Create - db2 instance and configure
-      script: "{{ playbook_dir }}/files/create_inst.sh"
+      script: "{{ playbook_dir }}/files/create_inst.sh {{ createinst['fencid'] }} {{ createinst['instid'] }}"
+      when: createinst['create'] | bool
       tags: createinst
 
     - name: Create - db2 database

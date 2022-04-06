@@ -6,7 +6,7 @@
   hosts: "{{ targethost | default('empty_group') }}"
   gather_facts: no
   become: yes
-  become_user: "{{ ansible_user }}"
+  #become_user: "{{ ansible_user }}"
 
   vars_files:
     - "{{ vars_db2.yml }}"

@@ -6,8 +6,13 @@
    loop: "{{ dirstocreate }}"
    tags: createdirs
 
- - name: Create - DB2 Related dirs.
-   file: path="{{ item }}" state=directory owner="{{ createinst['instid'] }}" group="{{ createinst['instgrp'] }}" mode=0775
+ - name: Create - DB2 Related Directories.
+   file: path="{{ item }}" state=directory owner=root group="{{ createinst['instgrp'] }}" mode=0775
+   loop: "{{ db2dirs }}"
+   tags: createdirs
+
+ - name: Create - DB2 Instance Home Directory.
+   file: path="{{ item }}" state=directory owner="{{ createinst['instid'] }}" group="{{ createinst['instgrp'] }}" mode=0755
    loop: "{{ db2dirs }}"
    tags: createdirs
 

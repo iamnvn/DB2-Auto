@@ -1,6 +1,6 @@
 ---
 # vars file for db2_build
-targethost: db2build
+#targethost: db2build
 tgtdir: /db/db2_build
 swlocaldir: /root/projects
 swtocopy: v11.1.4fp5_linuxx64_server_t.tar.gz

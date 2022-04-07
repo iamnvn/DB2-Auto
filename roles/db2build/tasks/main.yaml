@@ -2,11 +2,11 @@
       run_once: true
       tags: always
 
-    - name: Run - prereq steps
+    - name: Run - Prereq Steps
       import_tasks: pre_reqs.yaml
       tags: prereq
 
-    - name: Run - DB2 Install on Target Server
+    - name: Run - DB2 Install
       shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
       tags: install
 

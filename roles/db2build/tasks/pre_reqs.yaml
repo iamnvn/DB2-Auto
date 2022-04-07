@@ -12,29 +12,28 @@
    tags: createdirs
 
  - name: Create - DB2 Instance Home Directory.
-   file: path="{{ item }}" state=directory owner="{{ createinst['instid'] }}" group="{{ createinst['instgrp'] }}" mode=0755
-   loop: "{{ db2dirs }}"
+   file: path="/db/home" state=directory owner="{{ createinst['instid'] }}" group="{{ createinst['instgrp'] }}" mode=0755
    tags: createdirs
 
  - name: Copy - Comman functions and variables file
    template: src=templates/include_db2.sh dest=/tmp/include_db2 mode=0777
    tags: always
 
- - name: Copy - binaries to target nodes
+ - name: Copy - DB2 Binaries
    copy: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
    tags: copybinaries
 
- - name: Unzip - db2binaries
+ - name: Unzip - DB2 Binaries
    unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes
    when: ansible_distribution != "AIX"
    tags: copybinaries
 
- - name: Unzip - db2binaries
-   shell: cd "{{ binariesdir }}";tar -xvf "{{ binariesdir }}/{{ swtocopy }}"
+ - name: Unzip - DB2 Binaries
+   shell: cd "{{ binariesdir }}";tar -xzvf "{{ binariesdir }}/{{ swtocopy }}"
    when: ansible_distribution == "AIX"
    tags: copybinaries
 
- - name: Copy - Scrips to target node
+ - name: Copy - DB2 Standard Scrips
    copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
    loop: "{{ scriptstocopy }}"
    tags: copyscripts

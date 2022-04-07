@@ -27,7 +27,7 @@
    unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes
    when: ansible_distribution != "AIX"
    tags: copybinaries
-
+   
  - name: Unzip - DB2 Binaries
    shell: cd "{{ binariesdir }}";tar -xzvf "{{ binariesdir }}/{{ swtocopy }}"
    when: ansible_distribution == "AIX"

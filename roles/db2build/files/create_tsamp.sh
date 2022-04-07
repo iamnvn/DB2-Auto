@@ -2,7 +2,7 @@
 # Script Name: create_tsamp.sh
 # Description: This script will create TSAMP if ${HNAME}_db2hadr.xml file exist in Instance Home Directory.
 # Arguements: NA
-# Date: Nov 11, 2021
+# Date: Apr 4, 2022
 # Written by: Naveen C
 
 SCRIPTNAME=create_tsamp.sh

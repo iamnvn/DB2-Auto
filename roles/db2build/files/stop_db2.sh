@@ -2,7 +2,7 @@
 # Script Name: stop_db2.sh
 # Description: This script will force all applications and stops db2 instance.
 # Arguements: NA (Run as db2 instance)
-# Date: Nov 11, 2021
+# Date: Apr 4, 2022
 # Written by: Naveen C
 
 SCRIPTNAME=stop_db2.sh

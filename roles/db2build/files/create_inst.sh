@@ -2,7 +2,7 @@
 # Script Name: create_inst.sh
 # Description: This script will create db2 instance.
 # Arguements: DB2 Instance to create
-# Date: Nov 13, 2021
+# Date: Apr 4, 2022
 # Written by: Naveen C
 
 SCRIPTNAME=create_inst.sh

@@ -2,7 +2,7 @@
 # Script Name: start_db2.sh
 # Description: This script will start db2 instance and activate dbs.
 # Arguements: NA (Run as db2 instance)
-# Date: Nov 13, 2021
+# Date: Apr 4, 2022
 # Written by: Naveen C
 
 SCRIPTNAME=start_db2.sh

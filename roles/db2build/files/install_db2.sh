@@ -2,7 +2,7 @@
 # Script Name: install_db2.sh
 # Description: This script will install db2 on server on new installation path.
 # Arguements: NA (run as root/sudo)
-# Date: Nov 12, 2021
+# Date: Apr 4, 2022
 # Written by: Naveen C
 
 SCRIPTNAME=install_db2.sh

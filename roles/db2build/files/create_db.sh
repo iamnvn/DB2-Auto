@@ -2,7 +2,7 @@
 # Script Name: create_db.sh
 # Description: This script will create db2 database.
 # Arguements: DB2 database to create
-# Date: Nov 24, 2021
+# Date: Apr 4, 2022
 # Written by: Naveen C
 
 SCRIPTNAME=create_db.sh

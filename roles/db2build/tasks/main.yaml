@@ -25,7 +25,7 @@
              if [[ -f /db/home/sqllib/db2profile ]]; then . /db/home/sqllib/db2profile; fi
              db2set DB2AUTH=OSAUTHDB
              db2set DB2COMM=SSL,TCPIP
-             db2 -v "update dbm cfg using SVCENAME db2c_${DB2INST}"
+             db2 -v "update dbm cfg using SVCENAME db2c_{{ inst }}"
              db2stop force;db2start
              #tar -xvf /engnfs/igs/dba/DB2/server_config_files.tar
              #mkdir -m 3777 /db/messagelog/{{ inst }}

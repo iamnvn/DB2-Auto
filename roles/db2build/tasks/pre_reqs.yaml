@@ -22,7 +22,7 @@
    tags: addport
 
  - name: Copy - Comman functions and variables file
-   template: src=templates/include_db2.sh dest=/tmp/include_db2 mode=0777
+   template: src="templates/include_db2.sh" dest="/tmp/include_db2" mode=0777
    tags: always
 
  - name: Copy - DB2 Binaries

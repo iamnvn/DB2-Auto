@@ -15,12 +15,19 @@
    file: path="/db/home" state=directory owner="{{ createinst['instid'] }}" group="{{ createinst['instgrp'] }}" mode=0755
    tags: createdirs
 
+- name: Add - Instance port number to /etc/services
+  lineinfile:
+    path: /etc/services
+    line: "db2c_{{ createinst['instid'] }}  {{ createinst['instport'] }}/tcp  #DB2 Instance Communication port"
+  tags: addport
+
  - name: Copy - Comman functions and variables file
    template: src=templates/include_db2.sh dest=/tmp/include_db2 mode=0777
    tags: always
 
  - name: Copy - DB2 Binaries
    copy: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
+   delegate_to: "{{ swsrchost }}"
    tags: copybinaries
 
  - name: Unzip - DB2 Binaries

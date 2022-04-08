@@ -18,7 +18,7 @@
  - name: Add - Instance port number to /etc/services
    lineinfile:
     path: /etc/services
-    line: "db2c_{{ createinst['instid'] }}  {{ createinst['instport'] }}/tcp  #DB2 Instance Communication port"
+    line: "db2c_{{ createinst['instid'] }}    {{ createinst['instport'] }}/tcp               #DB2 Instance Communication port"
    tags: addport
 
  - name: Copy - Comman functions and variables file
@@ -28,7 +28,7 @@
  - name: Copy - DB2 Binaries
    copy: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
    delegate_to: "{{ swsrchost }}"
-   become: false
+   #become: false
    tags: copybinaries
 
  - name: Unzip - DB2 Binaries

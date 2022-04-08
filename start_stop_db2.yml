@@ -7,7 +7,7 @@
 # Date: Feb 14, 2022                                                           #
 # Written by: Naveen Chintada                                                  #
 #===============================================================================
-- name: DB2 restarts on host group - {{ target_server }}
+- name: DB2 restarts on host or group
   #hosts: "{{ targethost | default('empty_group') }}"
   hosts: "{{ target_server | mandatory }}"
   gather_facts: no
@@ -17,7 +17,7 @@
   vars:
     - dbaction: ''
     - actionon: all
-    #- targethost: all
+    - target_server: all
     
   roles:
     - db2stopstart

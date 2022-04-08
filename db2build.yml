@@ -2,7 +2,7 @@
 # tasks file for db2_upgrade
 # main script file
 
-- name: DB2 Standard build on host group - {{ target_server }}
+- name: DB2 Standard build on host or group
   hosts: "{{ target_server | default('empty_group') }}"
   gather_facts: yes
   become: yes

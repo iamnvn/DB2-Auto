@@ -35,10 +35,10 @@ log "START - ${SCRIPTNAME} execution started at $(date)"
         if [[ -f ${INSTHOME}/sqllib/db2profile ]]; then
             . ${INSTHOME}/sqllib/db2profile
         fi
-    db2set DB2AUTH=OSAUTHDB
-    db2set DB2COMM=TCPIP
-    db2 update dbm cfg using SVCENAME 60000
+    db2set DB2AUTH=OSAUTHDB >> ${LOGFILE}
+    db2set DB2COMM=SSL,TCPIP >> ${LOGFILE}
+    db2 -v "update dbm cfg using SVCENAME db2c_${DB2INST}" >> ${LOGFILE}
 
-    db2stop force;db2start
+    db2stop force;db2start >> ${LOGFILE}
 
 log "END - ${SCRIPTNAME} execution ended at $(date)"

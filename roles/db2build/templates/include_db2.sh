@@ -12,7 +12,7 @@ SCRIPTSDIR=${TGTDIR}/scripts
 STEPSDIR=${TGTDIR}/steps
 
 LOGFILE=${LOGDIR}/${SCRIPTNAME}.log
-MAINLOG=${LOGDIR}/db2_build-${HNAME}.log
+#MAINLOG=${LOGDIR}/db2_build-${HNAME}.log
 
 #if [[ "${HNAME:0:2}" == "DV" ]]; then
 #    DB2INST=db2iu1dv
@@ -30,8 +30,8 @@ MAINLOG=${LOGDIR}/db2_build-${HNAME}.log
 
 ## Comman functions
 function log {
-    echo "" | tee -a ${LOGFILE} >> ${MAINLOG}
-    echo "@ $(date +"%Y-%m-%d %H:%M:%S") - "$1 | tee -a ${LOGFILE} >> ${MAINLOG}
+    echo "" | tee -a ${LOGFILE} #>> ${MAINLOG}
+    echo "@ $(date +"%Y-%m-%d %H:%M:%S") - "$1 | tee -a ${LOGFILE} #>> ${MAINLOG}
     echo ""
     echo "@ $(date +"%Y-%m-%d %H:%M:%S") - "$1
 }

@@ -46,7 +46,7 @@
           tags: createinst
 
         - name: Create - db2 database
-          script: "create_db.sh {{ createdb['name'] }} {{ createdb['datadir'] }} {{ createdb['dbdir'] {{ inst }} }}"
+          script: "create_db.sh {{ createdb['name'] }} {{ createdb['datadir'] }} {{ createdb['dbdir'] }} {{ inst }}"
           when: createdb['create'] | bool
           tags: createdb
 

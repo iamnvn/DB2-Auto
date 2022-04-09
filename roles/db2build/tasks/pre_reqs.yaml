@@ -2,7 +2,7 @@
 ## pre-req tasks
 
  - name: Create - Directory Structure
-   file: path="{{ item }}" state=directory mode=0755
+   file: path="{{ item }}" state=directory owner=root group="{{ createinst['instgrp'] }}" mode=0777
    loop: "{{ dirstocreate }}"
    tags: createdirs
 

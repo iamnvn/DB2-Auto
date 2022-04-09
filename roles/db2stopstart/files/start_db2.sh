@@ -11,7 +11,7 @@ SCRIPTNAME=start_db2.sh
     . /tmp/include_db2
 
 DB2INST=$1
-LOGFILE=${LOGFILE}_${DB2INST}
+LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
 log_roll ${LOGFILE}
 
 ## Get Instance home directory

@@ -18,7 +18,7 @@ log_roll ${LOGFILE}
     get_inst_home
 
 #Source db2profile
-    if [ -f ${INSTHOME}/sqllib/db2profile ]; then
+    if [[ -f ${INSTHOME}/sqllib/db2profile ]]; then
         . ${INSTHOME}/sqllib/db2profile
     fi
 

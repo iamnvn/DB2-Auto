@@ -2,7 +2,7 @@
 # vars file for db2_build
 target_server: all
 tgtdir: /db/db2_build
-swsrchost: 192.168.1.104
+swsrchost: 192.168.1.103
 swlocaldir: /root/projects
 swtocopy: v11.1.4fp5_linuxx64_server_t.tar.gz
 swtype: server_t

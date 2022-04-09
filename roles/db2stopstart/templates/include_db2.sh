@@ -11,7 +11,7 @@ SCRIPTSDIR=${TGTDIR}/scripts
 STEPSDIR=${TGTDIR}/steps
 
 LOGFILE=${LOGDIR}/${SCRIPTNAME}.log
-MAINLOG=${LOGDIR}/db2restart-${HNAME}.log
+MAINLOG=${LOGDIR}/stop_start_db2-${HNAME}.log
 
 HADRROLES=${SCRIPTSDIR}/HADRroles_db2.txt
 

@@ -8,7 +8,7 @@
           - "{{ item }} is defined"
           - "{{ item }} | length > 0"
           - "{{ item }} != None"
-        fail_msg: "{{ item }} needs to be set for the role to work. Ex: ansible-playbook db2_restarts2.yaml -e 'dbaction=stop actionon=standby'"
+        fail_msg: "{{ item }} needs to be set for the role to work. Ex: ansible-playbook start_stop_db2.yml -e 'dbaction=stop actionon=standby'"
         success_msg: "Required variable {{ item }} is defined"
       loop: ['dbaction','actionon']
 

@@ -9,6 +9,7 @@
     - set_fact:
          inst: "{{ createinst['instid'] }}"
          fenc: "{{ createinst['fencid'] }}"
+      tags: always
 
     - debug: msg="{{ inst }}"
 
@@ -52,7 +53,7 @@
           shell: "$HOME/sqllib/adm/db2licm -a {{ scriptsdir }}/{{ db2lic | basename }}"
           when: licfile is defined
           tags: lic
-      become: yes
+      become: true
       become_user: "{{ inst }}"
 
       rescue:

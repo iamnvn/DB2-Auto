@@ -9,12 +9,12 @@ SCRIPTNAME=create_db.sh
 DBNAME=$1
 DATADIR=$2
 DBDIR=$3
+DB2INST=$4
 
 
 ## Call commanly used functions and variables
     . /tmp/include_db2
 
-#DB2INST=$1
 ## Get Instance home directory
     get_inst_home
 

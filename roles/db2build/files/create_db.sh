@@ -26,7 +26,7 @@ DBDIR=$3
 log "START - ${SCRIPTNAME} execution started at $(date)"
 
     log "Create - ${DBNAME} on ${DB2INST}"
-    log "Running - db2 -v \"CREATE DATABASE ${DBNAME} ON ${DATADIR} DBPATH ON ${DBDIR} RESTRICTIVE\" > ${LOGDIR}/${DB2INST}_db2icrt.log"
+    log "Running - db2 -v \"CREATE DATABASE ${DBNAME} ON ${DATADIR} DBPATH ON ${DBDIR} RESTRICTIVE\" > ${LOGDIR}/${DBNAME}_create.log"
         db2 -v "CREATE DATABASE ${DBNAME} ON ${DATADIR} DBPATH ON ${DBDIR} RESTRICTIVE" > ${LOGDIR}/${DB2INST}_db2icrt.log 2>&1
         RCD=$?
 

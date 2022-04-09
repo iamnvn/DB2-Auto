@@ -7,6 +7,7 @@ swlocaldir: /root/projects
 swtocopy: v11.1.4fp5_linuxx64_server_t.tar.gz
 swtype: server_t
 db2vpath: /opt/IBM/db2/11.1
+installtsamp: no
 licfile: db2ese.lic
 
 ## Crate instance vars.
@@ -35,27 +36,3 @@ db2dirs:
     - /db/exp
     - /db/dbdir
     - /db/data
-
-#######################################################
-##  Do not change below values until really needed   ##
-#######################################################
-
-dirstocreate:
-    - "{{ tgtdir }}"
-    - "{{ tgtdir }}/scripts"
-    - "{{ tgtdir }}/logs"
-    - "{{ tgtdir }}/binaries"
-
-scriptsdir: "{{ tgtdir }}/scripts"
-binariesdir: "{{ tgtdir }}/binaries"
-logdir: "{{ tgtdir }}/logs"
-db2sw: "{{ swlocaldir }}/{{ swtocopy }}"
-
-scriptstocopy:
-    - stop_db2.sh
-    - create_tsamp.sh
-    - create_inst.sh
-    - create_db.sh
-    - install_db2.sh
-    - start_db2.sh
-    - "{{ licfile }}"

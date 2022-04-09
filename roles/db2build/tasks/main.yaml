@@ -51,7 +51,7 @@
           tags: createdb
 
         - name: Apply - db2 license
-          shell: "$HOME/sqllib/adm/db2licm -a {{ scriptsdir }}/{{ db2lic | basename }}"
+          shell: '$HOME/sqllib/adm/db2licm -a {{ scriptsdir }}/{{ db2lic | basename }}'
           when: licfile is defined
           tags: lic
       become: true

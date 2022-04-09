@@ -32,8 +32,8 @@ LOGFILE=${LOGDIR}/${SCRIPTNAME}.log
 function log {
     echo "" | tee -a ${LOGFILE} #>> ${MAINLOG}
     echo "@ $(date +"%Y-%m-%d %H:%M:%S") - "$1 | tee -a ${LOGFILE} #>> ${MAINLOG}
-    echo ""
-    echo "@ $(date +"%Y-%m-%d %H:%M:%S") - "$1
+    #echo ""
+    #echo "@ $(date +"%Y-%m-%d %H:%M:%S") - "$1
 }
 
 function log_roll {

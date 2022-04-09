@@ -27,7 +27,7 @@ log "START - ${SCRIPTNAME} execution started at $(date)"
 
     log "Create - ${DBNAME} on ${DB2INST}"
     log "Running - db2 -v \"CREATE DATABASE ${DBNAME} ON ${DATADIR} DBPATH ON ${DBDIR} RESTRICTIVE\" > ${LOGDIR}/${DBNAME}_create.log"
-        db2 -v "CREATE DATABASE ${DBNAME} ON ${DATADIR} DBPATH ON ${DBDIR} RESTRICTIVE" > ${LOGDIR}/${DBNAME}_create.log" 2>&1
+        db2 -v "CREATE DATABASE ${DBNAME} ON ${DATADIR} DBPATH ON ${DBDIR} RESTRICTIVE" > ${LOGDIR}/${DBNAME}_create.log 2>&1
         RCD=$?
 
 	if [[ ${RCD} -eq 0 ]]; then

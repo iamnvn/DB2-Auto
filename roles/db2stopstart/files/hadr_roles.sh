@@ -11,7 +11,8 @@ SCRIPTNAME=hadr_roles.sh
     . /tmp/include_db2
 
 DB2INST=$1
-LOGFILE=${DB2INST}_${LOGFILE}
+LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
+
 ## Get Instance home directory
     get_inst_home
 

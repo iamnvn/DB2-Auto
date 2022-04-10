@@ -11,7 +11,9 @@ SCRIPTNAME=start_db2.sh
     . /tmp/include_db2
 
 DB2INST=$1
-LOGFILE=${DB2INST}_${LOGFILE}
+LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
+log_roll ${LOGFILE}
+
 ## Get Instance home directory
     get_inst_home
 
@@ -19,11 +21,11 @@ LOGFILE=${DB2INST}_${LOGFILE}
     if [[ -f ${INSTHOME}/sqllib/db2profile ]]; then
         . ${INSTHOME}/sqllib/db2profile
     fi
-log_roll ${LOGFILE}
+
 log "START - ${SCRIPTNAME} execution started at $(date)"
 
 log "${HNAME}:${DB2INST} preparing to start"
-    db2start > ${LOGDIR}/${DB2INST}.db2start.out 2>&1
+    db2start > ${LOGDIR}/${DB2INST}_db2start.out 2>&1
     DB2STARTRC=$?
 
 	if [[ "${DB2STARTRC}" -eq 0 || "${DB2STARTRC}" -eq 1 ]]; then

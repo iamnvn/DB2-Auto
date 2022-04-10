@@ -11,6 +11,7 @@ SCRIPTNAME=todolist.sh
 ## Calling comman functions and variables.
     . /tmp/include_db2
 
+LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
 log_roll ${LOGFILE}
 log_roll ${MAINLOG}
 log "START - ${SCRIPTNAME} execution started at $(date)"
@@ -36,38 +37,38 @@ if [[ "$(cat /tmp/db2-role_${DB2INST}.txt)" == "STANDARD" ]]; then
 elif [[ "$(cat /tmp/db2-role_${DB2INST}.txt)" == "PRIMARY" && "$(cat /tmp/db2-hadrstate_${DB2INST}.txt)" == "PEER" ]]; then
 
   if [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "stop" && "$(cat /tmp/actionon.txt | tr A-Z a-z)" == "primary" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh" > ${STEPSDIR}/STAGE02.DB2STEP02.${HNAME}.STOP-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh" >> ${STEPSDIR}/STAGE02.DB2STEP02.${HNAME}.STOP-DB2.TODO
   elif [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "start" && "$(cat /tmp/actionon.txt | tr A-Z a-z)" == "primary" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.START-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.START-DB2.TODO
   fi
 
 ## This block will run for Principal Standby servers.
 elif [[ "$(cat /tmp/db2-role_${DB2INST}.txt)" == "STANDBY" && "$(cat /tmp/db2-hadrstate_${DB2INST}.txt)" == "PEER" ]]; then
   
   if [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "stop" && "$(cat /tmp/actionon.txt | tr A-Z a-z)" == "primary" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" failover.sh" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.FAILOVER-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" failover.sh" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.FAILOVER-DB2.TODO
   elif [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "stop" && "$(cat /tmp/actionon.txt | tr A-Z a-z)" == "standby" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.STOP-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.STOP-DB2.TODO
   elif [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "start" && "$(cat /tmp/actionon.txt | tr A-Z a-z)" == "standby" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.START-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.START-DB2.TODO
   fi
   
 ## This block will run for Auxilary Standby(DR) servers.
 elif [[ "$(cat cat /tmp/db2-role_${DB2INST}.txt)" == "STANDBY" && "$(cat /tmp/db2-hadrstate_${DB2INST}.txt)" == "REMOTE_CATCHUP" ]]; then
 
   if [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "stop" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.STOP-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.STOP-DB2.TODO
   elif [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "start" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.START-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.START-DB2.TODO
   fi
 
 ## This block will run for Primay with DR server (SYNCMODE should be SUPERASYNC)
 elif [[ "$(cat /tmp/db2-role_${DB2INST}.txt)" == "PRIMARY" && "$(cat /tmp/db2-hadrstate_${DB2INST}.txt)" == "REMOTE_CATCHUP" ]]; then
 
   if [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "stop" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.STOP-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.STOP-DB2.TODO
   elif [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "start" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.START-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.START-DB2.TODO
   fi
 
 fi

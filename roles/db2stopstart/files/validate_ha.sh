@@ -11,7 +11,7 @@ DB2INST=$1
 ## Calling comman functions and variables.
     . /tmp/include_db2
 
-LOGFILE=${LOGFILE}_${DB2INST}
+LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
 log_roll ${LOGFILE}
 function hadr_roles {
     DB2INST=$1

@@ -11,13 +11,13 @@ SCRIPTNAME=failover.sh
     . /tmp/include_db2
 
 DB2INST=$1
-LOGFILE=${DB2INST}_${LOGFILE}
+LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
 log_roll ${LOGFILE}
 ## Get Instance home directory
     get_inst_home
 
 #Source db2profile
-    if [ -f ${INSTHOME}/sqllib/db2profile ]; then
+    if [[ -f ${INSTHOME}/sqllib/db2profile ]]; then
         . ${INSTHOME}/sqllib/db2profile
     fi
 

@@ -75,9 +75,6 @@ fi
 done
     log "TODOs: $(cd ${STEPSDIR} && ls STAGE*DB2STEP*.${HNAME}.*)"
 
-    touch ${TGTDIR}/db2.running
-    chmod 666 ${TGTDIR}/db2.running
-
     log "Adjusting file permissions"
     chmod 777 ${LOGDIR}/*.log
     chmod 755 ${STEPSDIR}/STAGE*DB2STEP*.${HNAME}.*

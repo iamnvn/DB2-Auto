@@ -28,9 +28,9 @@ do
 if [[ "$(cat /tmp/db2-role_${DB2INST}.txt)" == "STANDARD" ]]; then
 
   if [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "stop" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh ${DB2INST}" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.${DB2INST}.STOP-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" stop_db2.sh ${DB2INST}" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.${DB2INST}.STOP-DB2.TODO
   elif [[ "$(cat /tmp/dbaction.txt | tr A-Z a-z)" == "start" ]]; then
-    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh ${DB2INST}" >> ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.${DB2INST}.START-DB2.TODO
+    echo "\"${SCRIPTSDIR}/runasdb2.sh\" start_db2.sh ${DB2INST}" > ${STEPSDIR}/STAGE01.DB2STEP01.${HNAME}.${DB2INST}.START-DB2.TODO
   fi
 
 ## This block will run for Primary db servers.

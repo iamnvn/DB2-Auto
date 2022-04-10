@@ -13,7 +13,6 @@ DB2INST=$1
 
 LOGFILE=${LOGFILE}_${DB2INST}
 log_roll ${LOGFILE}
-
 function hadr_roles {
     DB2INST=$1
 

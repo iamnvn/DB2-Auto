@@ -11,9 +11,8 @@ SCRIPTNAME=failover.sh
     . /tmp/include_db2
 
 DB2INST=$1
-LOGFILE=${LOGFILE}_${DB2INST}
+LOGFILE=${DB2INST}_${LOGFILE}
 log_roll ${LOGFILE}
-
 ## Get Instance home directory
     get_inst_home
 

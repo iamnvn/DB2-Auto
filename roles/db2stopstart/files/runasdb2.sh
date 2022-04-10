@@ -10,16 +10,17 @@ SCRIPTNAME=runasdb2.sh
 ## Call commanly used functions and variables
 . /tmp/include_db2
 
-SCRIPTTORUN=$1
-DBINST=$2
-
 log_roll ${LOGFILE}
 if [[ -f ${MAINLOG} ]]; then 
         chmod -f 777 ${MAINLOG}
 else
-        touch ${MAINLOG}; chmod -f 777 ${MAINLOG}
+        touch ${MAINLOG}; chmod 777 ${MAINLOG}
 fi
 
+
+SCRIPTTORUN=$1
+DBINST=$2
+        
         su ${DBINST} -c "${SCRIPTSDIR}/${SCRIPTTORUN} ${DBINST}"
 
         RCD=$?
@@ -27,3 +28,4 @@ fi
                 log "${SCRIPTTORUN} did not run using ${DBINST}, Please check !!"
                 exit ${RCD}
         fi
+

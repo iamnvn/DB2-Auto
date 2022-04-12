@@ -11,6 +11,7 @@
         fail_msg: "{{ item }} needs to be set for the role to work. Ex: ansible-playbook start_stop_db2.yml -e 'dbaction=stop actionon=standby'"
         success_msg: "Required variable {{ item }} is defined"
       loop: ['dbaction','actionon']
+      run_once: true
 
     - name: Create - Directory Structure
       file: path="{{ item }}" state=directory mode=0777

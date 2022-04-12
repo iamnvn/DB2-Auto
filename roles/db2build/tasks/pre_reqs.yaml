@@ -27,8 +27,8 @@
 
  - name: Copy - DB2 Binaries
    copy: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
-   delegate_to: "{{ swsrchost }}"
-   become: false
+   #delegate_to: "{{ swsrchost }}"
+   become: yes
    tags: copybinaries
 
  - name: Unzip - DB2 Binaries

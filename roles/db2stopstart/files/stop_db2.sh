@@ -24,6 +24,7 @@ log_roll ${LOGFILE}
 
 log "START - ${SCRIPTNAME} execution started at $(date)"
 
+function stop_db {
     tsacluster
     if [[ "${CLUSTER}" == "TSAMP" ]]; then
         log "Preparing to disable tsamp"
@@ -52,5 +53,8 @@ log "${HNAME}:${DB2INST} preparing to stop database and db2instance"
         cat ${LOGDIR}/${DB2INST}.db2stop.out >> ${LOGFILE}
         exit 11
 	fi
+}
 
+#CHKPRIMARY=$()
+stop_db
 log "END - ${SCRIPTNAME} execution ended at $(date)"

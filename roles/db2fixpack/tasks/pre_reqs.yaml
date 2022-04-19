@@ -11,7 +11,8 @@
    tags: copytemplate
 
  - name: Copy - binaries to target nodes
-   copy: src="{{ swlocaldir }}/{{ swtocopy }}" dest="{{ binariesdir }}" mode=0755
+   copy: src="{{ swlocaldir }}/{{ swtocopy }}" dest="{{ binariesdir }}" mode=0755 remote_src=yes
+   deligate_to: 192.168.1.105
    tags: copybinaries
 
  - name: Unzip - db2binaries

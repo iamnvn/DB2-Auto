@@ -17,7 +17,7 @@
 
  - name: Copy - binaries to target nodes
    synchronize: src="{{ swlocaldir }}/{{ swtocopy }}" dest="{{ binariesdir }}" mode=push
-   deligate_to: 192.168.1.105
+   #deligate_to: 192.168.1.105
    tags: copybinaries
 
  - name: Unzip - db2binaries

@@ -1,6 +1,6 @@
 ---
 # vars file for db2 Fixpack upgrade
-target_server: db2test                                 ## Target hosts group which mentioned in ansible inventory file.
+target_server: all                                 ## Target hosts group which mentioned in ansible inventory file.
 tgtdir: /home/db2inst1/maint                        ## Target machines director to copy binaries scripts etc.
 swlocaldir: /root/projects                          ## DB2 Software location in local(controllar) server.
 swtocopy: v11.1.4fp6_linuxx64_client.tar.gz         ## DB2 Software to copy and install on target servers.

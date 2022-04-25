@@ -1,0 +1,60 @@
+---
+    - debug: msg="Play_hosts={{play_hosts}}"
+      run_once: true
+      tags: always
+
+    - set_fact:
+         scripttype: "{{ scripttorun.split('.')[1] }}"
+         script: "{{ scripttorun | basename }}"
+         db2ilist: "{{ db2inst | default('') }}"
+      tags: always
+
+    - name: Copy - Script to target node
+      copy: src="{{ scripttorun }}" dest="/tmp/{{ script }}" mode=0755
+      ignore_errors: true
+      tags: copy
+
+    - name: Get db2 instances
+      shell: |
+             $(/usr/local/bin/db2ls | tail  -1 | awk '{print $1"/instance/db2ilist"}') > /tmp/db2ilist.lst
+             chmod 777 /tmp/db2ilist.lst;
+             cat /tmp/db2ilist.lst
+      register: db2ilist
+      when: db2ilist == "all"
+      tags: always
+
+    - name: Info - Available DB2 Instances
+      debug: msg="{{ db2ilist.stdout_lines }}"
+      tags: listinst,info
+
+    - name: Info - Going to run
+      debug:
+        msg: "{{ scripttorun }} {{ arg1 }} {{ arg2 }}"
+
+    - name: Run - Script on target node
+      shell: "/tmp/{{ script }} {{ arg1 }} {{ arg2 }} > /tmp/{{ script }}_out.txt"
+      when: (scripttype == "sh") or (scripttype == "ksh")
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: run
+
+    - name: Run - DB2 Script on target node
+      shell: db2 -tvf "/tmp/{{ script }}" > "/tmp/{{ script }}_out.txt"
+      when: (scripttype == "sql") or (scripttype == "db2")
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: run
+
+    - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"
+      fetch: src="/tmp/{{ script }}_out.txt" dest="{{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}_{{ ansible_user }}.txt" flat=yes
+      ignore_errors: true
+      tags: fetch
+
+    - name: Remove - Files from target nodes.
+      file: path="{{ item }}" state=absent
+      loop:
+        - "/tmp/{{ script }}"
+        - "/tmp/{{ script }}_out.txt"
+      tags: remove

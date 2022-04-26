@@ -6,7 +6,7 @@
     - set_fact:
          scripttype: "{{ scripttorun.split('.')[1] }}"
          script: "{{ scripttorun | basename }}"
-         db2ilist: "{{ db2inst | default('') }}"
+         #db2ilist: "{{ db2inst | default('') }}"
       tags: always
 
     - name: Copy - Script to target node
@@ -15,10 +15,10 @@
       tags: copy
 
     - import_tasks: run_as_all_incs.yml
-      when: db2ilist == "all"
+      when: db2inst == "all"
 
     - import_tasks: run_as_one_inc.yml
-      when: db2ilist != "all"
+      when: db2inst != "all"
 
     - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"
       fetch: src="/tmp/{{ script }}_out.txt" dest="{{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}.txt" flat=yes

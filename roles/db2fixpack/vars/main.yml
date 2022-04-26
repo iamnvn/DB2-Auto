@@ -3,7 +3,7 @@
 target_server: all                                  ## Target hosts group which mentioned in ansible inventory file.
 tgtdir: /home/db2inst1/maint                        ## Target machines director to copy binaries scripts etc.
 swlocaldir: /root/projects                          ## DB2 Software location in local(controllar) server.
-swtocopy: v11.1.4fp6_linuxx64_client.tar.gz         ## DB2 Software to copy and install on target servers.
-swtype: client                                      ## After extract .tar file which directory will create. Ex: universal / server_t / client.
-db2product: client                                  ## Which software product going to install client / server.
-pversion: FEB-2022                                  ## Patch version. User defined can give any name.
+swtocopy: v11.1.4fp6_linuxx64_universal_fixpack.tar ## DB2 Software to copy and install on target servers.
+swtype: universal                                   ## After extract .tar file which directory will create. Ex: universal / server_t / client.
+db2product: server                                  ## Which software product going to install client / server.
+pversion: APR-2022                                  ## Patch version. User defined can give any name.

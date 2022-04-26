@@ -1,7 +1,7 @@
 ---
-    #- name: Info - Running script DB2 Instances
-    #  debug: msg="{{ db2ilist.stdout }}"
-    #  tags: listinst,info
+    - name: Info - Running script with DB2 Instances
+      debug: msg="{{ db2inst }}"
+      tags: listinst,info
 
     - name: Info - Going to run
       debug:
@@ -13,7 +13,7 @@
              chmod -R 777 "/tmp/{{ script }}_out.txt"
       when: (scripttype == "sh") or (scripttype == "ksh")
       become: true
-      become_user: "{{ db2ilist.stdout }}"
+      become_user: "{{ db2inst }}"
       tags: run
 
     - name: Run - DB2 Script on target node
@@ -22,5 +22,5 @@
              chmod -R 777 "/tmp/{{ script }}_out.txt"
       when: (scripttype == "sql") or (scripttype == "db2")
       become: true
-      become_user: "{{ db2ilist.stdout }}"
+      become_user: "{{ db2inst }}"
       tags: run

@@ -14,10 +14,14 @@
       ignore_errors: true
       tags: copy
 
-    - import_tasks: run_as_all_incs.yml
+    - include_tasks: run_as_all_incs.yml
+      vars: 
+        db2ilist: "{{ db2inst | default('') }}"
       when: db2ilist == "all"
 
-    - import_tasks: run_as_one_inc.yml
+    - include_tasks: run_as_one_inc.yml
+      vars:
+        db2ilist: "{{ db2inst | default('') }}"
       when: db2ilist != "all"
 
     - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"

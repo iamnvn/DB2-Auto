@@ -1,2 +1,2 @@
-connect to inst1db;
+connect to TESTDB;
 select * from syscat.tables with ur;

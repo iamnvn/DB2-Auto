@@ -23,8 +23,12 @@
       when: db2ilist == "all"
       tags: always
 
+    #- name: Info - Available DB2 Instances
+    #  debug: msg="{{ db2ilist.stdout_lines }}"
+    #  tags: listinst,info
+
     - name: Info - Available DB2 Instances
-      debug: msg="{{ db2ilist.stdout_lines }}"
+      debug: msg="{{ db2ilist.stdout }}"
       tags: listinst,info
 
     - name: Info - Going to run

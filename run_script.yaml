@@ -16,7 +16,7 @@
   roles:
     - role: runscript
       vars:
-        scripttorun: sample.sh
-        targethost: localhost
-        arg1: "{{ sampledb | default('') }}"
-        arg2: "{{ full | default('') }}"
+        scripttorun: test.sh
+        targethost: all
+        arg1: "{{ '' | default('') }}"
+        arg2: "{{ '' | default('') }}"

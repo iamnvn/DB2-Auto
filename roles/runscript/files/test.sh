@@ -1,4 +1,4 @@
-echo "Run test script"
+echo "Run test script as $(whoami)"
 date
 
 sleep 2

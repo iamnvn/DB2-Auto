@@ -20,6 +20,7 @@
 
     - name: Run - DB2 Script on target node - ONE Instance
       shell: |
+             . $HOME/sqllib/db2profile
              db2 -tvf /tmp/{{ script }} | tee -a /tmp/{{ script }}_out.txt
              chmod -f 777 /tmp/{{ script }}_out.txt
       register: cmdout

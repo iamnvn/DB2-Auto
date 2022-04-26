@@ -1,0 +1,26 @@
+---
+    - name: Info - Running script DB2 Instances
+      debug: msg="{{ db2ilist.stdout }}"
+      tags: listinst,info
+
+    - name: Info - Going to run
+      debug:
+        msg: "{{ scripttorun }} {{ arg1 }} {{ arg2 }}"
+
+    - name: Run - Script on target node
+      shell: |
+             "/tmp/{{ script }} {{ arg1 }} {{ arg2 }}" >> "/tmp/{{ script }}_out.txt"
+             chmod -R 777 "/tmp/{{ script }}_out.txt"
+      when: (scripttype == "sh") or (scripttype == "ksh")
+      become: true
+      become_user: "{{ db2ilist.stdout }}"
+      tags: run
+
+    - name: Run - DB2 Script on target node
+      shell: |
+             db2 -tvf "/tmp/{{ script }}" >> "/tmp/{{ script }}_out.txt"
+             chmod -R 777 "/tmp/{{ script }}_out.txt"
+      when: (scripttype == "sql") or (scripttype == "db2")
+      become: true
+      become_user: "{{ db2ilist.stdout }}"
+      tags: run

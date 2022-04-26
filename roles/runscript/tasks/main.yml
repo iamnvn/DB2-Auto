@@ -14,10 +14,10 @@
       ignore_errors: true
       tags: copy
 
-    - include_tasks: run_as_all_incs.yml
+    - import_tasks: run_as_all_incs.yml
       when: db2ilist == "all"
 
-    - include_tasks: run_as_one_inc.yml
+    - import_tasks: run_as_one_inc.yml
       when: db2ilist != "all"
 
     - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"

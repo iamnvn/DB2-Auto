@@ -1,4 +1,10 @@
 ---
+    - set_fact:
+         scripttype: "{{ scripttorun.split('.')[1] }}"
+         script: "{{ scripttorun | basename }}"
+         db2ilist: "{{ db2inst | default('') }}"
+      tags: always
+    
     - name: Info - Running script DB2 Instances
       debug: msg="{{ db2ilist.stdout }}"
       tags: listinst,info

@@ -9,7 +9,7 @@
 
     - name: Run - Script on target node
       shell: |
-             "/tmp/{{ script }} {{ arg1 }} {{ arg2 }}" >> "/tmp/{{ script }}_out.txt"
+             /tmp/{{ script }} >> /tmp/{{ script }}_out.txt
              chmod -R 777 "/tmp/{{ script }}_out.txt"
       when: (scripttype == "sh") or (scripttype == "ksh")
       become: true

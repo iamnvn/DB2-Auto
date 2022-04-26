@@ -23,7 +23,7 @@
     - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"
       fetch: src="/tmp/{{ script }}_out.txt" dest="{{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}.txt" flat=yes
       ignore_errors: true
-      deligate_to: 192.168.1.105
+      #deligate_to: 192.168.1.105
       tags: fetch
 
     - name: Remove - Files from target nodes.

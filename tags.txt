@@ -1,0 +1,24 @@
+[root@osboxes DB2-Auto]# ansible-playbook db2build.yml --list-tags
+
+playbook: db2build.yml
+
+  play #1 (all): DB2 Standard build on host or group    TAGS: []
+      TASK TAGS: [addport, always, copybinaries, copyscripts, createdb, createdirs, createinst, install, lic, prereq]
+[root@osboxes DB2-Auto]# ansible-playbook start_stop_db2.yml --list-tags
+
+playbook: start_stop_db2.yml
+
+  play #1 (all): DB2 restarts on host or group  TAGS: []
+      TASK TAGS: [always, copyscripts, createdirs, info, listinst, main, removescripts, todos, validateroles]
+[root@osboxes DB2-Auto]# ansible-playbook run_script.yaml --list-tags
+
+playbook: run_script.yaml
+
+  play #1 (all): Run script in target node - all        TAGS: []
+      TASK TAGS: [always, copy, fetch, remove, run]
+[root@osboxes DB2-Auto]# ansible-playbook db2_fpupgrade.yaml --list-tags
+
+playbook: db2_fpupgrade.yaml
+
+  play #1 (all): DB2 Fixpack upgrade on host group - {{ targethost }}   TAGS: []
+      TASK TAGS: [always, copybinaries, copyscripts, copytemplate, createdirs, hadr_roles, main, prereq, runtodo, todos]

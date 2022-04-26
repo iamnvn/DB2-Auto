@@ -32,3 +32,7 @@
         - "/tmp/{{ script }}"
         - "/tmp/{{ script }}_out.txt"
       tags: remove
+
+    - name: Display - Output
+      command: "cat {{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}.txt"
+      deligate_to: localhost

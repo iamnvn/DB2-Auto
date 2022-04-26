@@ -16,12 +16,12 @@
 
     - include_tasks: run_as_all_incs.yml
       vars: 
-        db2ilist: "{{ db2inst | default('') }}"
+        db2ilist: "{{ db2inst }}"
       when: db2ilist == "all"
 
     - include_tasks: run_as_one_inc.yml
       vars:
-        db2ilist: "{{ db2inst | default('') }}"
+        db2ilist: "{{ db2inst }}"
       when: db2ilist != "all"
 
     - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"

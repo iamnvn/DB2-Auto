@@ -1,16 +1,16 @@
 ---
-    - name: Info - Running script with DB2 Instances
-      debug: msg="{{ db2inst }}"
-      tags: listinst,info
+    #- name: Info - Running script with DB2 Instances
+    #  debug: msg="{{ db2inst }}"
+    #  tags: listinst,info
 
     - name: Info - Going to run
       debug:
-        msg: "{{ scripttorun }} {{ arg1 }} {{ arg2 }}"
+        msg: "{{ scripttorun }} will run for {{ db2inst }} - Instance"
 
     - name: Run - Script on target node
       shell: |
              /tmp/{{ script }} >> /tmp/{{ script }}_out.txt
-             chmod -R 777 "/tmp/{{ script }}_out.txt"
+             chmod -R 777 /tmp/{{ script }}_out.txt
       when: (scripttype == "sh") or (scripttype == "ksh")
       become: true
       become_user: "{{ db2inst }}"

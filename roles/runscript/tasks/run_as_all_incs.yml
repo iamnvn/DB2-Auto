@@ -32,7 +32,9 @@
       shell: |
              db2 -tvf "/tmp/{{ script }}" >> "/tmp/{{ script }}_out.txt"
              chmod -f 777 "/tmp/{{ script }}_out.txt"
+      register: cmdout       
       when: (scripttype == "sql") or (scripttype == "db2")
+      failed_when: cmdout.rc > 1
       become: true
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"

@@ -11,7 +11,9 @@
       shell: |
              /tmp/{{ script }} >> /tmp/{{ script }}_out.txt
              chmod -f 777 /tmp/{{ script }}_out.txt
+      register: cmdout
       when: (scripttype == "sh") or (scripttype == "ksh")
+      failed_when: cmdout.rc > 1
       become: true
       become_user: "{{ db2inst }}"
       tags: run
@@ -20,7 +22,9 @@
       shell: |
              db2 -tvf "/tmp/{{ script }}" >> "/tmp/{{ script }}_out.txt"
              chmod -f 777 "/tmp/{{ script }}_out.txt"
+      register: cmdout
       when: (scripttype == "sql") or (scripttype == "db2")
+      failed_when: cmdout.rc > 1
       become: true
       become_user: "{{ db2inst }}"
       tags: run

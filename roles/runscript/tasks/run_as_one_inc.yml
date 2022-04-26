@@ -1,7 +1,7 @@
 ---
-    - name: Info - Running script DB2 Instances
-      debug: msg="{{ db2ilist.stdout }}"
-      tags: listinst,info
+    #- name: Info - Running script DB2 Instances
+    #  debug: msg="{{ db2ilist.stdout }}"
+    #  tags: listinst,info
 
     - name: Info - Going to run
       debug:

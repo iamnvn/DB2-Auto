@@ -21,7 +21,7 @@ DB2INST=$1
 
 
 if [[ "${DB2PRODUCT}" == "client" ]]; then
-    DBROLE=client
+    DBROLE=CLIENT
     echo -e "${DBROLE}"
 else
     #List out databases in DB2 Instance
@@ -45,11 +45,3 @@ else
 		echo -e "${DBNAME} ${DBROLE} ${DBHADRSTATE} ${DBHADRCONNSTATUS} ${DBSTDBYHOST} ${DBPRIMARYHOST} ${DBSTDBYHOST2} ${DBSTDBYHOST3}"
 	done < /tmp/${DB2INST}.db.lst
 fi
-  #echo "DBNAME = $(cat ${SCRIPTSDIR}/HADRroles_db2.txt | awk '{print $1}' | tail -1)"
-  #echo "DBROLE = ${DBROLE}"
-  #echo "DBHADRSTATE = ${DBHADRSTATE}"
-  #echo "DBHADRCONNSTATUS = ${DBHADRCONNSTATUS}"
-  #echo "DBSTDBYHOST = ${DBSTDBYHOST}"
-  #echo "DBPRIMARYHOST = ${DBPRIMARYHOST}"
-  #echo "DBSTDBYHOST2 = ${DBSTDBYHOST2}"
-  #echo "DBSTDBYHOST3 = ${DBSTDBYHOST3}"

@@ -7,7 +7,7 @@
 # Date: Apr 17, 2022                                                           #
 # Written by: Naveen Chintada                                                  #
 #===============================================================================
-- name: DB2 Fixpack upgrade on host group - {{ targethost }}
+- name: DB2 Fixpack upgrade on host group - {{ target_server }}
   hosts: "{{ target_server | default('empty_group') }}"
   gather_facts: no
   become: yes

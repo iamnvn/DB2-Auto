@@ -25,9 +25,11 @@ log "Collecting database and role info"
     (./runasdb2.sh hadr_roles.sh > ${HADRROLES})
     chmod -f 666 ${HADRROLES}
 
-    if [[ "$(grep -c ' ' ${HADRROLES})" == "$(grep -c 'STANDARD' ${HADRROLES})" ]]; then
-      echo "CLIENT" > db2-role.txt
-      log "This Server - ${HNAME} role is $(cat db2-role.txt)"
+    if [[ "$(grep -c ' ' ${HADRROLES})" == "$(grep -c 'CLIENT' ${HADRROLES})" ]]; then
+      if [[ "$(grep -c 'CLIENT' ${HADRROLES})" -ne 0 ]]; then
+        echo "CLIENT" > db2-role.txt
+        log "This Server - ${HNAME} role is $(cat db2-role.txt)"
+      fi
     elif [[ "$(grep -c ' ' ${HADRROLES})" == "$(grep -c 'STANDARD' ${HADRROLES})" ]]; then
       if [[ "$(grep -c 'STANDARD' ${HADRROLES})" -ne 0 ]]; then
         echo "STANDARD" > db2-role.txt

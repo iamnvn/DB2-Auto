@@ -1,0 +1,7 @@
+---
+    - name: Stop DB2 Instance and Databases
+      script: "stop_db2.sh {{ item }}"
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: startdb

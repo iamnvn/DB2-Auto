@@ -9,16 +9,16 @@
 #===============================================================================
 - name: DB2 restarts on host or group
   #hosts: "{{ targethost | default('empty_group') }}"
-  hosts: "{{ target_server | mandatory }}"
+  hosts: "{{ targethost | mandatory }}"
   gather_facts: no
-  become: yes
+  #become: yes
   #become_user: "{{ ansible_user }}"
-
-  vars:
-    - dbaction: ''
-    - actionon: all
-    - target_server: all
     
   roles:
-    - db2stopstart
+    - role: db2stopstart
+      vars:
+        dbaction: start
+        targethost: all
+        
+
 

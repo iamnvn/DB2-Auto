@@ -1,0 +1,52 @@
+---
+    - name: Copy - Scrips to target node
+      copy: src="{{ item }}" dest="/tmp/{{ item }}" mode=0755
+      loop: "{{ scriptstocopy }}"
+      tags: copyscripts
+
+    - name: Validate DB2 Instance and Databases
+      shell: |
+              #. /tmp/validate_db2.sh >> /tmp/validate_db2.sh.log
+              . $HOME/sqllib/db2profile
+              echo "Instance: $(whoami)" >> /tmp/validate_db2.sh.log
+              echo "-----------------------------------------------------------" >> /tmp/validate_db2.sh.log
+              db2pd - >> /tmp/validate_db2.sh.log
+              db2pd - -alldbs >> /tmp/validate_db2.sh.log
+              echo "-----------------------------------------------------------" >> /tmp/validate_db2.sh.log
+              chmod -f 777 /tmp/validate_db2.sh.log
+      register: chm
+      failed_when: chm.rc > 1 
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: validatedb
+
+    - command: "cat /tmp/validate_db2.sh.log"
+      register: cmdout
+
+    - name: Display - Instance and Database Validation Output
+      debug: msg="{{ cmdout.stdout_lines }}"
+      tags: output
+
+    - name: Validate HADR and TSA
+      shell: |
+              #. /tmp/validate_db2.sh >> /tmp/db2_val_ha.sh.log
+              . $HOME/sqllib/db2profile
+              echo "Instance: $(whoami)" >> /tmp/db2_val_ha.sh.log
+              echo "-----------------------------------------------------------" >> /tmp/db2_val_ha.sh.log
+              db2pd -ha >> /tmp/db2_val_ha.sh.log
+              chmod -f 777 /tmp/db2_val_ha.sh.log
+              echo "-----------------------------------------------------------" >> /tmp/db2_val_ha.sh.log
+      register: chm
+      failed_when: chm.rc > 1
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: validateha
+
+    - command: "cat /tmp/db2_val_ha.sh.log"
+      register: cmdoutha
+
+    - name: Display - HADR TSA Validation Output
+      debug: msg="{{ cmdoutha.stdout_lines }}"
+      tags: outputha

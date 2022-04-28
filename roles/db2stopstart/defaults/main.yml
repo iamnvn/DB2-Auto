@@ -5,17 +5,13 @@
 
 dirstocreate:
     - "{{ tgtdir }}"
-    - "{{ tgtdir }}/scripts"
     - "{{ tgtdir }}/logs"
-    - "{{ tgtdir }}/steps"
-
-scriptsdir: "{{ tgtdir }}/scripts"
-stepsdir: "{{ tgtdir }}/steps"
 
 scriptstocopy:
-    - failover.sh
-    - start_db2.sh
-    - stop_db2.sh
-    - runasdb2.sh
-    - validate_ha.sh
-    - todolist.sh
+    - validate_db2.sh
+    #- failover.sh
+    #- start_db2.sh
+    #- stop_db2.sh
+    #- runasdb2.sh
+    #- validate_ha.sh
+    #- todolist.sh

@@ -23,16 +23,20 @@
     - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"
       fetch: src="/tmp/{{ script }}_out.txt" dest="{{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}.txt" flat=yes
       ignore_errors: true
-      #deligate_to: 192.168.1.105
       tags: fetch
+
+    - name: Get - Output
+      command: "cat {{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}.txt"
+      register: cmdout
+      tags: output
+
+    - name: Display - Output
+      debug: msg="{{ cmdout.stdout_lines }}"
+      tags: output
 
     - name: Remove - Files from target nodes.
       file: path="{{ item }}" state=absent
       loop:
         - "/tmp/{{ script }}"
         - "/tmp/{{ script }}_out.txt"
-      tags: remove
-
-    - name: Display - Output
-      command: "cat {{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}.txt"
-      deligate_to: localhost
+      tags: cleanup

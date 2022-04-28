@@ -8,9 +8,9 @@
           - "{{ item }} is defined"
           - "{{ item }} | length > 0"
           - "{{ item }} != None"
-        fail_msg: "{{ item }} needs to be set for the role to work. Ex: ansible-playbook start_stop_db2.yml -e 'dbaction=stop actionon=standby'"
+        fail_msg: "{{ item }} needs to be set for the role to work. Ex: ansible-playbook start_stop_db2.yml -e 'dbaction=stop'"
         success_msg: "Required variable {{ item }} is defined"
-      loop: ['dbaction','actionon']
+      loop: ['dbaction']
       run_once: true
 
     - name: Create - Directory Structure
@@ -22,15 +22,21 @@
       template: src=templates/include_db2.sh dest=/tmp/include_db2 mode=0777
       tags: copyscripts
 
-    - name: Copy - Scrips to target node
-      copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
-      loop: "{{ scriptstocopy }}"
-      tags: copyscripts
+    #- name: Copy - Scrips to target node
+    #  copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
+    #  loop: "{{ scriptstocopy }}"
+    #  tags: copyscripts
 
     - name: Get db2 instances
       shell: |
              $(/usr/local/bin/db2ls | tail  -1 | awk '{print $1"/instance/db2ilist"}') > /tmp/db2ilist.lst
-             chmod 777 /tmp/db2ilist.lst; echo "{{ dbaction }}" > /tmp/dbaction.txt; echo "{{ actionon }}" > /tmp/actionon.txt;
+             chmod 777 /tmp/db2ilist.lst;
+             if [[ -f /tmp/db2-role.txt ]]; then rm -f /tmp/db2-role.txt; fi
+             if [[ -f /tmp/db2-standby.txt ]]; then rm -f /tmp/db2-standby.txt; fi
+             if [[ -f /tmp/validate_db2.sh.log ]]; then rm -f /tmp/validate_db2.sh.log; fi
+             if [[ -f /tmp/db2_val_ha.sh.log ]]; then rm -f /tmp/db2_val_ha.sh.log; fi
+             . /tmp/include_db2
+             log_roll ${MAINLOG}
              cat /tmp/db2ilist.lst
       register: db2ilist
       tags: always
@@ -39,66 +45,62 @@
       debug: msg="{{ db2ilist.stdout_lines }}"
       tags: listinst,info
     
-    - name: Run - Validate db2 database Roles
-      shell: "sh {{ scriptsdir }}/runasdb2.sh validate_ha.sh {{ item }}"
+    - name: Run - Check Current db2 database Roles
+      script: "check_db_roles.sh {{ item }}"
+      become: true
+      become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
-      tags: validateroles,todos
+      tags: checkroles
+
+    - name: Get - HADR Roles
+      shell: |
+              if [[ $(cat /tmp/db2-role.txt | grep -i primary | wc -l) -gt 0 ]]; then
+                echo "$(cat /tmp/db2-role.txt | grep -i primary | head -1)" > /tmp/db_role.txt
+              else
+                echo "NOTPRIMARY NA" > /tmp/db_role.txt
+                #echo "PRIMARY {{ inventory_hostname }}" > /tmp/db_role.txt
+              fi
+              cat /tmp/db_role.txt
+      register: hadrout
+      tags: validateha
+
+    #- debug: msg="{{ hadrout.stdout }}"
     
-    - name: Create - Steps to run
-      shell: "sh {{ scriptsdir }}/todolist.sh"
-      tags: todos
+    - set_fact:
+       hadrop: "{{ hadrout.stdout.split(' ') }}"
+      tags: validateha
 
-    - name: Create - Steps to run on Standbys or Stand-Alone Servers
-      shell:
-        cmd: ls STAGE01.DB2STEP*.*.TODO | sed -e "s/\.TODO//g"
-        chdir: "{{ stepsdir }}"
-      register: todos1
-      failed_when: todos1.rc > 1
-      tags: todos,main
+    - set_fact:
+        DBROLE: "{{ hadrop.0 }}"
+        DBSTDBYHOST: "{{ hadrop.1 }}"
+      tags: validateha
 
-    - name: Create - Steps to run on Primary db2 server
-      shell:
-        cmd: ls STAGE02.DB2STEP*.*.TODO | sed -e "s/\.TODO//g"
-        chdir: "{{ stepsdir }}"
-      register: todos2
-      failed_when: todos2.rc > 1
-      tags: todos,main
+    - name: Info - Server Status
+      debug: msg="Current Server {{ inventory_hostname }} DB Role - {{ DBROLE }} and Standby Host - {{ DBSTDBYHOST }}"
+      tags: info
 
-    - name: Info - Steps to run on Standbys or Stand-alone or client db2 Server
-      debug:
-        msg: "{{ todos1.stdout }}"
-      ignore_errors: true
-      when: todos1.stdout != ''
-      tags: todos,main,info
+    - import_tasks: start_db2.yml
+      when: dbaction == "start"
+      tags: startdb
 
-    - name: Info - Steps to run on Primary Server
-      debug:
-        msg: "{{ todos2.stdout }}"
-      ignore_errors: true
-      when: todos2.stdout != ''
-      tags: todos,main,info
+    - name: Block for stop DB2 Database and Instances.
+      block:
+        - import_tasks: failover_db2.yml
+          delegate_to: "{{ DBSTDBYHOST }}"
+          when: DBROLE == "PRIMARY"
+          tags: failover
 
-    - name: Run - Steps on Standbys or Stand-Alone
-      shell:
-        cmd: "if ( sh {{ item }}.TODO ); then mv {{ item }}.TODO {{ item }}.DONE; else echo \"Failed: {{ item }}.TODO\"; fi"
-        chdir: "{{ stepsdir }}"
-      loop: "{{ todos1.stdout_lines }}"
-      when: todos1.stdout != ''
-      tags: main
+        - name: Stop - DB2 Databases and Instance
+          import_tasks: stop_db2.yml
 
-    - name: Run - Steps on Primary
-      shell:
-        cmd: "if ( sh {{ item }}.TODO ); then mv {{ item }}.TODO {{ item }}.DONE; else echo \"Failed: {{ item }}.TODO\"; fi"
-        chdir: "{{ stepsdir }}"
-      loop: "{{ todos2.stdout_lines }}"
-      when: todos2.stdout != ''
-      tags: main
+      when: dbaction == "stop"
+      tags: stopdb
 
-    - name: Remove - Scripts from Target directory
-      file: path="{{ scriptsdir }}/{{ item }}" state=absent
-      loop: "{{ scriptstocopy }}"
-      tags: removescripts
+    - import_tasks: validate_db2.yml
+      when: dbaction == "start" or dbaction == "validate" or dbaction == "status"
+      tags: validate
       
-    - file: path="{{ item }}" state=absent
-      loop: ['/tmp/dbaction.txt','/tmp/actionon.txt','/tmp/include_db2']
-      tags: removescripts
+    - name: Remove - Files from Target
+      file: path="{{ item }}" state=absent
+      loop: ['/tmp/include_db2']
+      tags: cleanup

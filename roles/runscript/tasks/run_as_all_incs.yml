@@ -18,7 +18,7 @@
     - name: Run - Script on target node - ALL Instances
       shell: |
              #/tmp/{{ script }} {{ arg1 }} {{ arg2 }} >> /tmp/{{ script }}_out.txt
-             /tmp/{{ script }} | tee -a /tmp/{{ script }}_out.txt
+             /tmp/{{ script }} >> /tmp/{{ script }}_out.txt
              chmod -f 777 /tmp/{{ script }}_out.txt
       register: cmdout
       when: (scripttype == "sh") or (scripttype == "ksh")
@@ -31,7 +31,7 @@
     - name: Run - DB2 Script on target node - ALL Instances
       shell: |
              . $HOME/sqllib/db2profile
-             db2 -tvf /tmp/{{ script }} | tee -a /tmp/{{ script }}_out.txt
+             db2 -tvf /tmp/{{ script }} >> /tmp/{{ script }}_out.txt
              chmod -f 777 /tmp/{{ script }}_out.txt
       register: cmdout       
       when: (scripttype == "sql") or (scripttype == "db2")
@@ -40,5 +40,3 @@
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
       tags: run
-
-    - debug: msg="{{ cmdout.stdout }}"

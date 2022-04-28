@@ -1,7 +1,5 @@
 ---
 # vars file for db2 restarts
-targethost: db2test
+targethost: all
 tgtdir: /tmp
-#dbaction: start     ## stop / start / restart
-
-#pversion: JAN-2022
+dbaction: start     ## stop / start / restart

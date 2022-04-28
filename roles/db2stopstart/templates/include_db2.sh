@@ -7,8 +7,8 @@ HNAME=$(hostname -s)
 HVERSION=$(uname -s)
 
 LOGDIR=${TGTDIR}/logs
-SCRIPTSDIR=${TGTDIR}/scripts
-STEPSDIR=${TGTDIR}/steps
+#SCRIPTSDIR=${TGTDIR}/scripts
+#STEPSDIR=${TGTDIR}/steps
 
 LOGFILE=${LOGDIR}/${SCRIPTNAME}.log
 MAINLOG=${LOGDIR}/stop_start_db2-${HNAME}.log
@@ -160,4 +160,4 @@ function get_inst_home {
     fi
 }
 
-cd ${SCRIPTSDIR}
+#cd ${SCRIPTSDIR}

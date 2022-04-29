@@ -70,7 +70,9 @@ ChkCrt_ReportDir ( )
 {
         if [[ ! -d ${scriptLogs} ]] ; then
           echo " Report directory ${scriptLogs} does not exists, creating the same"  
-          mkdir -m 775 -p ${scriptLogs}
+          mkdir -m 777 -p ${scriptLogs}
+		else
+		  chmod -fR 777 ${scriptLogs}
         fi       
 }
 

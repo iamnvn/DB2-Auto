@@ -6,7 +6,7 @@
 
     - name: Validate DB2 Instance and Databases
       shell: |
-              #. /tmp/validate_db2.sh >> /tmp/validate_db2.sh.log
+              sh /tmp/db2_val.sh >> /tmp/validate_db2.sh.log
               . $HOME/sqllib/db2profile
               echo "Instance: $(whoami)" >> /tmp/validate_db2.sh.log
               echo "-----------------------------------------------------------" >> /tmp/validate_db2.sh.log
@@ -30,7 +30,7 @@
 
     - name: Validate HADR and TSA
       shell: |
-              #. /tmp/validate_db2.sh >> /tmp/db2_val_ha.sh.log
+              sh /tmp/db2_val.sh >> /tmp/db2_val_ha.sh.log
               . $HOME/sqllib/db2profile
               echo "Instance: $(whoami)" >> /tmp/db2_val_ha.sh.log
               echo "-----------------------------------------------------------" >> /tmp/db2_val_ha.sh.log

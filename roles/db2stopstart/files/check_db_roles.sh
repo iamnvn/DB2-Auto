@@ -1,11 +1,11 @@
 #!/bin/bash
-# Script Name: validate_ha.sh
+# Script Name: check_db_roles.sh
 # Description: This script will print hadr status for each instance.
 # Arguments: DB2INST (Run as Instance)
 # Date: Feb 14, 2022
 # Written by: Naveen Chintada
 
-SCRIPTNAME=validate_ha.sh
+SCRIPTNAME=check_db_roles.sh
 DB2INST=$1
 
 ## Calling comman functions and variables.

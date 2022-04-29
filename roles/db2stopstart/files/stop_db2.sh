@@ -14,6 +14,10 @@ DB2INST=$1
 LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
 log_roll ${LOGFILE}
 
+if [[ -z ${DB2INST} ]]; then
+    DB2INST=$(whoami)
+fi
+
 ## Get Instance home directory
     get_inst_home
 
@@ -22,7 +26,7 @@ log_roll ${LOGFILE}
         . ${INSTHOME}/sqllib/db2profile
     fi
 
-log "START - ${SCRIPTNAME} execution started at $(date)"
+log "START - ${SCRIPTNAME} execution started for Instance - ${DB2INST} at $(date)"
 
 function stop_db {
     tsacluster
@@ -55,6 +59,10 @@ log "${HNAME}:${DB2INST} preparing to stop database and db2instance"
 	fi
 }
 
-#CHKPRIMARY=$()
-stop_db
-log "END - ${SCRIPTNAME} execution ended at $(date)"
+CHKPRIMARY=$(db2pd -alldbs -dbcfg  | grep "HADR database role" | grep -i primary | wc -l)
+if [[ ${CHKPRIMARY} -eq 0 ]]; then
+    stop_db
+else
+    log "Atlease one database seems to be PRIMARY on this node, Please check - ${HNAME}:${DB2INST}"
+fi
+log "END - ${SCRIPTNAME} execution ended for Instance - ${DB2INST} at $(date)"

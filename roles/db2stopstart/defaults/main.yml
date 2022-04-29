@@ -8,10 +8,7 @@ dirstocreate:
     - "{{ tgtdir }}/logs"
 
 scriptstocopy:
-    - validate_db2.sh
+    - db2_val.sh
     #- failover.sh
     #- start_db2.sh
     #- stop_db2.sh
-    #- runasdb2.sh
-    #- validate_ha.sh
-    #- todolist.sh

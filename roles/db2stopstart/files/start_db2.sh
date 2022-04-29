@@ -14,6 +14,10 @@ DB2INST=$1
 LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
 log_roll ${LOGFILE}
 
+if [[ -z ${DB2INST} ]]; then
+    DB2INST=$(whoami)
+fi
+
 ## Get Instance home directory
     get_inst_home
 
@@ -22,7 +26,7 @@ log_roll ${LOGFILE}
         . ${INSTHOME}/sqllib/db2profile
     fi
 
-log "START - ${SCRIPTNAME} execution started at $(date)"
+log "START - ${SCRIPTNAME} execution started for Instance - ${DB2INST} at $(date)"
 
 log "${HNAME}:${DB2INST} preparing to start"
     db2start > ${LOGDIR}/${DB2INST}_db2start.out 2>&1
@@ -48,4 +52,4 @@ log "${HNAME}:${DB2INST} preparing to start"
     exit 11
 	fi
 
-log "END - ${SCRIPTNAME} execution ended at $(date)"
+log "END - ${SCRIPTNAME} execution ended for Instance - ${DB2INST} at $(date)"

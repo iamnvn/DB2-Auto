@@ -1,8 +1,6 @@
 #!/bin/bash
-# vars file for db2_fpupgrade
+## Comman function and vars
 TGTDIR="{{ tgtdir }}"
-#ACTION="{{ dbaction }}"
-
 HNAME=$(hostname -s)
 HVERSION=$(uname -s)
 
@@ -35,14 +33,14 @@ function log {
 }
 
 function log_roll {
-    LOGNAME=$1
-    if [[ -f ${LOGNAME} ]]; then
-	    mv -f ${LOGNAME} ${LOGNAME}_old
-      touch ${LOGNAME}; chmod -f 777 ${LOGNAME}
+    LOGFNAME=$1
+    if [[ -f ${LOGFNAME} ]]; then
+	    mv -f ${LOGFNAME} ${LOGFNAME}_old
+      touch ${LOGFNAME}; chmod -f 777 ${LOGFNAME}
     else
-      touch ${LOGNAME}; chmod -f 777 ${LOGNAME}
+      touch ${LOGFNAME}; chmod -f 777 ${LOGFNAME}
     fi
-    find ${LOGDIR}/* -name "${LOGNAME}*" -type f -mtime +30 -exec rm -f {} \;
+    find ${LOGDIR}/* -name "${LOGFNAME}*" -type f -mtime +30 -exec rm -f {} \;
 }
 
 function list_dbs {
@@ -94,25 +92,25 @@ function activatedb {
 function db_hadr {
 
 	STANDBYCOUNT=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST | wc -l | awk '{print $1}')
-		DBCONNOP=$(db2 -ec +o connect to ${DBNAME})
-		DBROLE=$(db2pd -db ${DBNAME} -hadr | grep HADR_ROLE | awk '{print $3}' | head -1)
-		DBHADRSTATE=$(db2pd -db ${DBNAME} -hadr | grep HADR_STATE | awk '{print $3}' | head -1)
-		DBHADRCONNSTATUS=$(db2pd -db ${DBNAME} -hadr | grep HADR_CONNECT_STATUS  | awk '{print $3}' | head -1)
-		DBPRIMLOG=$(db2pd -db ${DBNAME} -hadr | grep PRIMARY_LOG_FILE | awk '{print $3 $4 $5}')
-		DBSTBYLOG=$(db2pd -db ${DBNAME} -hadr | grep STANDBY_LOG_FILE | awk '{print $3 $4 $5}')
-		DBPRIMARYHOST=$(db2pd -db ${DBNAME} -hadr | grep -i PRIMARY_MEMBER_HOST | head -1 | awk '{print $3}')
-		DBSTDBYHOST=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -1 | awk '{print $3}')
+	DBCONNOP=$(db2 -ec +o connect to ${DBNAME})
+	DBROLE=$(db2pd -db ${DBNAME} -hadr | grep HADR_ROLE | awk '{print $3}' | head -1)
+	DBHADRSTATE=$(db2pd -db ${DBNAME} -hadr | grep HADR_STATE | awk '{print $3}' | head -1)
+	DBHADRCONNSTATUS=$(db2pd -db ${DBNAME} -hadr | grep HADR_CONNECT_STATUS  | awk '{print $3}' | head -1)
+	DBPRIMLOG=$(db2pd -db ${DBNAME} -hadr | grep PRIMARY_LOG_FILE | awk '{print $3 $4 $5}')
+	DBSTBYLOG=$(db2pd -db ${DBNAME} -hadr | grep STANDBY_LOG_FILE | awk '{print $3 $4 $5}')
+	DBPRIMARYHOST=$(db2pd -db ${DBNAME} -hadr | grep -i PRIMARY_MEMBER_HOST | head -1 | awk '{print $3}')
+	DBSTDBYHOST=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -1 | awk '{print $3}')
 
-		if [[ ${STANDBYCOUNT} -eq 3 ]]; then
-			DBSTDBYHOST2=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -2 | tail -1 | awk '{print $3}')
-			DBSTDBYHOST3=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | tail -1 | awk '{print $3}')
-		elif [[ ${STANDBYCOUNT} -eq 2 ]]; then
-			DBSTDBYHOST2=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -2 | tail -1 | awk '{print $3}')
-			DBSTDBYHOST3=""
-		else
-			DBSTDBYHOST2=""
-			DBSTDBYHOST3=""
-		fi
+	if [[ ${STANDBYCOUNT} -eq 3 ]]; then
+		DBSTDBYHOST2=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -2 | tail -1 | awk '{print $3}')
+		DBSTDBYHOST3=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | tail -1 | awk '{print $3}')
+	elif [[ ${STANDBYCOUNT} -eq 2 ]]; then
+		DBSTDBYHOST2=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -2 | tail -1 | awk '{print $3}')
+		DBSTDBYHOST3=""
+	else
+		DBSTDBYHOST2=""
+		DBSTDBYHOST3=""
+	fi
 }
 
 function tsacluster {
@@ -159,5 +157,4 @@ function get_inst_home {
 	    INSTHOME=$(echo  $(cat /etc/passwd | grep ${DB2INST}) | cut -d: -f6)
     fi
 }
-
 #cd ${SCRIPTSDIR}

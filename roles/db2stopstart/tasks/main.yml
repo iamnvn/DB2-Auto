@@ -99,8 +99,12 @@
     - import_tasks: validate_db2.yml
       when: dbaction == "start" or dbaction == "validate" or dbaction == "status"
       tags: validate
+
+    - name: Remove - Scripts from Target directory
+      file: path="{{ scriptsdir }}/{{ item }}" state=absent
+      loop: "{{ scriptstocopy }}"
+      tags: cleanup      
       
-    - name: Remove - Files from Target
-      file: path="{{ item }}" state=absent
+    - file: path="{{ item }}" state=absent
       loop: ['/tmp/include_db2']
       tags: cleanup

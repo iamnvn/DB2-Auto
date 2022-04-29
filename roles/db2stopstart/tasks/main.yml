@@ -101,7 +101,7 @@
       tags: validate
 
     - name: Remove - Scripts from Target directory
-      file: path="{{ scriptsdir }}/{{ item }}" state=absent
+      file: path="/tmp/{{ item }}" state=absent
       loop: "{{ scriptstocopy }}"
       tags: cleanup      
       

@@ -63,6 +63,6 @@ CHKPRIMARY=$(db2pd -alldbs -dbcfg  | grep "HADR database role" | grep -i primary
 if [[ ${CHKPRIMARY} -eq 0 ]]; then
     stop_db
 else
-    log "Atlease one database seems to be PRIMARY on this node, Please check - ${HNAME}:${DB2INST}"
+    log "Atleast one database seems to be PRIMARY on this node, Please check - ${HNAME}:${DB2INST}"
 fi
 log "END - ${SCRIPTNAME} execution ended for Instance - ${DB2INST} at $(date)"

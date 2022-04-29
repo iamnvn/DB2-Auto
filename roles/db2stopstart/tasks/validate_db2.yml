@@ -25,9 +25,8 @@
 
     - name: Validate HADR and TSA
       shell: |
-              echo "Instance: $(whoami)" >> /tmp/db2_val_ha.sh.log
-              echo "-----------------------------------------------------------" >> /tmp/db2_val_ha.sh.log
-              sh /tmp/db2_val.sh >> /tmp/db2_val_ha.sh.log
+              echo "Instance: $(whoami)" >> /tmp/db2_val_ha.sh.log              
+              sh /tmp/validateHADRTSA.sh >> /tmp/db2_val_ha.sh.log
               chmod -f 777 /tmp/db2_val_ha.sh.log
  
       register: chm

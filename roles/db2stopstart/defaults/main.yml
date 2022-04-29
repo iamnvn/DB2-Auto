@@ -9,6 +9,7 @@ dirstocreate:
 
 scriptstocopy:
     - db2_val.sh
+    - validateHADRTSA.sh
     #- failover.sh
     #- start_db2.sh
     #- stop_db2.sh

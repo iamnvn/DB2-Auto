@@ -97,7 +97,7 @@
       tags: stopdb
 
     - import_tasks: validate_db2.yml
-      when: dbaction == "start" or dbaction == "validate" or dbaction == "status"
+      when: dbaction == "start" or dbaction == "validate" or dbaction == "status" or dbaction == "stop" 
       tags: validate
 
     - name: Remove - Scripts from Target directory

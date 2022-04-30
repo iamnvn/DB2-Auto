@@ -22,3 +22,30 @@ playbook: db2_fpupgrade.yaml
 
   play #1 (all): DB2 Fixpack upgrade on host group - {{ targethost }}   TAGS: []
       TASK TAGS: [always, copybinaries, copyscripts, copytemplate, createdirs, hadr_roles, main, prereq, runtodo, todos]
+
+
+ftwlxtstt004.iss.bnr.com
+
+scripttorun: db2_val.sh
+targethost: all
+fetchdir: /tmp
+db2inst: all
+
+#######################################################################
+Bro, when you get time check this please.
+
+$ ./validateHADRTSA.sh
+-ksh: ./validateHADRTSA.sh: not found [No such file or directory]
+$ ls -la | grep -i validateHADRTSA.sh
+-rwxr-xr-x.  1 root     root              20944 Apr 27 03:13 validateHADRTSA.sh
+-rwxrwxrwx.  1 db2npoc  dba                   0 Apr 27 03:01 validateHADRTSA.sh_out.txt
+
+#######################################################################
+
+
+  - name: Copying patch file to endpoint
+        synchronize:
+          src: "{{ repo_sw_dir | mandatory }}/{{ item }}"
+          dest: "{{ target_sw_dir | mandatory }}"
+          mode: push
+        delegate_to: "{{ repo_server | mandatory }}"

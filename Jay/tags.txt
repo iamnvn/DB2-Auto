@@ -49,10 +49,3 @@ $ ls -la | grep -i validateHADRTSA.sh
           dest: "{{ target_sw_dir | mandatory }}"
           mode: push
         delegate_to: "{{ repo_server | mandatory }}"
-
-
-Perhaps you have ctrl-M (carriage returns) at the end of each line in your file.
-
-To view: cat -v /data/upgrade/upgrade_db.ksh
-
-To fix: perl -p -i -e "s/\r//g" /data/upgrade/upgrade_db.ksh

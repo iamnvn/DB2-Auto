@@ -1,0 +1,13 @@
+---
+    - shell: |
+              cat /tmp/db2ilist.lst | grep -v db2cln
+      register: db2ilist
+      when: dbaction != "status"
+      tags: always
+    
+    - name: Start DB2 Instance and Databases
+      command: "{{ scriptsdir }}/start_db2.sh {{ item }}"
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: startdb

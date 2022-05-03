@@ -72,7 +72,7 @@
       tags: fetch
 
     - name: Get - Output
-      command: "cat {{ fetchdir }}/{{ script }}_out_{{ curtmstmp }}.txt"
+      command: "cat {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt"
       register: cmdout
       tags: output
 

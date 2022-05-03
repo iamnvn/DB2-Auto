@@ -11,6 +11,10 @@ DB2INST=$1
 ## Calling comman functions and variables.
     . /tmp/include_db2
 
+if [[ -z ${DB2INST} ]]; then
+    DB2INST=$(whoami)
+fi
+
 LOGFILE=${LOGDIR}/${DB2INST}_${SCRIPTNAME}.log
 log_roll ${LOGFILE}
 function hadr_roles {
@@ -46,7 +50,7 @@ function hadr_roles {
 			DBSTDBYHOST3=NOAX2
 		fi
 
-		echo -e "${DBNAME} ${DBROLE} ${DBHADRSTATE} ${DBHADRCONNSTATUS} ${DBSTDBYHOST} ${DBPRIMARYHOST} ${DBSTDBYHOST2} ${DBSTDBYHOST3}" > /tmp/HADR_roles_${DB2INST}.txt
+		echo -e "${DBNAME} ${DBROLE} ${DBHADRSTATE} ${DBHADRCONNSTATUS} ${DBSTDBYHOST} ${DBPRIMARYHOST} ${DBSTDBYHOST2} ${DBSTDBYHOST3}"
 
         chmod -f 777 /tmp/HADR_roles_${DB2INST}.txt
 
@@ -55,7 +59,7 @@ function hadr_roles {
 
 function validate_ha {
     DB2INST=$1
-    HADRROLES=/tmp/HADR_roles_${DB2INST}.txt
+    HADRROLES=/tmp/HADR_roles.txt
 
     if [[ "$(grep -c ' ' ${HADRROLES})" == "$(grep -c 'STANDARD' ${HADRROLES})" ]]; then
       if [[ "$(grep -c 'STANDARD' ${HADRROLES})" -ne 0 ]]; then
@@ -69,7 +73,7 @@ function validate_ha {
             log "All databases are CONNECTED"
         else
             log "ERROR: One or more dbs are not HADR CONNECTED State, Please check!"
-            exit 11
+            #exit 11
         fi
 
         if [[ $(cat ${HADRROLES} | grep 'PRIMARY' | wc -l) -gt 0 ]]; then
@@ -84,12 +88,13 @@ function validate_ha {
     fi
   chmod -f 744 *.txt
   echo "$(cat /tmp/db2-role_${DB2INST}.txt) $(cat /tmp/db2-standby_${DB2INST}.txt)" >> /tmp/db2-role.txt
+  chmod -f 777 /tmp/db2-role.txt
   
   rm -f /tmp/db2-role_${DB2INST}.txt /tmp/db2-standby_${DB2INST}.txt /tmp/HADR_roles_${DB2INST}.txt
 }
 
 #while read DB2INST
 #do
-    hadr_roles ${DB2INST}
+    hadr_roles ${DB2INST} >> /tmp/HADR_roles.txt
     validate_ha ${DB2INST}
 #done < /tmp/db2ilist.lst

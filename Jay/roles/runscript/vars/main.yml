@@ -1,7 +1,0 @@
----
-scripttorun: sample.sh
-targethost: localhost
-fetchdir: /tmp
-arg1: "{{ sampledb | default('') }}"
-arg2: "{{ full | default('') }}"
-db2inst: all

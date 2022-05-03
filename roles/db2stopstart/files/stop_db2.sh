@@ -29,20 +29,20 @@ fi
 log "START - ${SCRIPTNAME} execution started for Instance - ${DB2INST} at $(date)"
 
 function stop_db {
-    tsacluster
-    if [[ "${CLUSTER}" == "TSAMP" ]]; then
-        log "Preparing to disable tsamp"
-        yes 1 | db2haicu -disable > ${LOGDIR}/stop_tsamp_${HNAME}.log
-        RCD=$?
-        if [[ ${RCD} -ne 0 ]]; then
-            log "WARNING: Unable to disable tsamp, Please check!"
-            cat ${LOGDIR}/stop_tsamp_${HNAME}.log >> ${LOGFILE}
-        fi
-    fi
+    #tsacluster
+    #if [[ "${CLUSTER}" == "TSAMP" ]]; then
+    #    log "Preparing to disable tsamp"
+    #    yes 1 | db2haicu -disable > ${LOGDIR}/stop_tsamp_${HNAME}.log
+    #    RCD=$?
+    #    if [[ ${RCD} -ne 0 ]]; then
+    #        log "WARNING: Unable to disable tsamp, Please check!"
+    #        cat ${LOGDIR}/stop_tsamp_${HNAME}.log >> ${LOGFILE}
+    #    fi
+    #fi
 
-log "${HNAME}:${DB2INST} preparing to stop database and db2instance"
+    log "${HNAME}:${DB2INST} preparing to stop database and db2instance"
 
-## Deactivate database and stopping instance
+    ## Deactivate database and stopping instance
     log "Deactivating databases in ${HNAME}:${DB2INST}"
     deactivatedb
     db2stop force > ${LOGDIR}/${DB2INST}.db2stop.out 2>&1

@@ -1,21 +1,19 @@
 #!/bin/bash
 ### File Name    : validateHADRTSA.sh
 ### About        : Monitoring db2 HADR/TSA status
-### Author       : 
-###                Created/re-using  this as part of db2upgrade
-### Author       : 
-### Version Changes : 
+### Author       :
+###              :
+### Author       :
 
 this_pgm=validateHADRTSA
 server=`uname -n | cut -d'.' -f1`
 mmdd=`date +%Y%m%d_%H%M%S`
 banner='**************************************************************************'
 
- db2profileF=${HOME}/sqllib/db2profile
-
- scriptPath=/tmp/
- scriptLogs=${scriptPath}${this_pgm}.rpt
- tempLogs=${scriptLogs}
+db2profileF=${HOME}/sqllib/db2profile
+scriptPath=/tmp/
+scriptLogs=${scriptPath}${this_pgm}.rpt
+tempLogs=${scriptLogs}
 
 out_log=${scriptLogs}/${this_pgm}_${mmdd}.out
 out_tmp=${scriptLogs}/${this_pgm}_${mmdd}.tmp
@@ -283,11 +281,7 @@ check_HADRP ( )
                                 rStatus=2;
                                 fi
 
-                                                                if [[ ${hadrMode} == "NEARSYNC" || ${hadrMode} == "SYNC"   ]] ; then
-                                                                    hadrMode1="CHEKPASS"
-                                                                fi
-
-                                if [[ ( ${stndID} -eq 1 && ${hadrMode1} != "CHEKPASS" ) || ( ${stndID} -ne 1 && ${hadrMode} != "SUPERASYNC" ) ]] ; then
+                                if [[ ( ${stndID} -eq 1 && ${hadrMode} != "NEARSYNC" ) || ( ${stndID} -ne 1 && ${hadrMode} != "SUPERASYNC" ) ]] ; then
                                 hadrMode="*${hadrMode}"
                                 rStatus=2;
                                 fi
@@ -444,3 +438,4 @@ Print_Header
 setdb2env
 CheckHADR
 returnexit
+

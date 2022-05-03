@@ -2,51 +2,64 @@
     - debug: msg="Play_hosts={{play_hosts}}"
       run_once: true
 
-    - name: Verify that required variables are defined
-      assert:
-        that: 
-          - "{{ item }} is defined"
-          - "{{ item }} | length > 0"
-          - "{{ item }} != None"
-        fail_msg: "{{ item }} needs to be set for the role to work. Ex: ansible-playbook start_stop_db2.yml -e 'dbaction=stop'"
-        success_msg: "Required variable {{ item }} is defined"
-      loop: ['dbaction']
-      run_once: true
-
     - name: Create - Directory Structure
-      file: path="{{ item }}" state=directory mode=0777
+      shell: |
+              DIR="{{ item }}"
+              if [[ ! -d ${DIR} ]]; then 
+                sudo mkdir -m 777 -p ${DIR}   
+                RC=$?
+              fi
+              if [[ ${RC} -gt 0 ]]; then
+                echo "Not able to create ${DIR},Please check"
+                exit 21
+              fi
+              #path="{{ item }}" state=directory mode=0777
       loop: "{{ dirstocreate }}"
       tags: createdirs
 
     - name: Copy - Comman functions and variables file
       template: src=templates/include_db2.sh dest=/tmp/include_db2 mode=0777
+      when: dbaction != "status"
       tags: copyscripts
 
-    #- name: Copy - Scrips to target node
-    #  copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
-    #  loop: "{{ scriptstocopy }}"
-    #  tags: copyscripts
+    - name: Copy - Scrips to target node
+      copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
+      loop: "{{ scriptstocopy }}"
+      tags: copyscripts
+      when: dbaction != "status"
 
     - name: Get db2 instances
       shell: |
-             $(/usr/local/bin/db2ls | tail  -1 | awk '{print $1"/instance/db2ilist"}') > /tmp/db2ilist.lst
-             chmod 777 /tmp/db2ilist.lst;
-             if [[ -f /tmp/db2-role.txt ]]; then rm -f /tmp/db2-role.txt; fi
-             if [[ -f /tmp/db2-standby.txt ]]; then rm -f /tmp/db2-standby.txt; fi
-             if [[ -f /tmp/validate_db2.sh.log ]]; then rm -f /tmp/validate_db2.sh.log; fi
-             if [[ -f /tmp/db2_val_ha.sh.log ]]; then rm -f /tmp/db2_val_ha.sh.log; fi
-             . /tmp/include_db2
-             log_roll ${MAINLOG}
-             cat /tmp/db2ilist.lst
+              #$(/usr/local/bin/db2ls | tail  -1 | awk '{print $1"/instance/db2ilist"}') > /tmp/db2ilist.lst
+              DB2INST="{{ db2inst }}"
+              if [[ "${DB2INST}" == "all" ]]; then
+                /usr/local/bin/db2ls |  tail -n +4 | awk '{print $1}' |while read inst; do $inst/instance/db2ilist; done > /tmp/db2ilist.lst
+              else
+                echo "${DB2INST}" > /tmp/db2ilist.lst;
+              fi
+              chmod 777 /tmp/db2ilist.lst;
+              if [[ -f /tmp/db2-role.txt ]]; then sudo rm -f /tmp/db2-role.txt; fi
+              if [[ -f /tmp/db2-standby.txt ]]; then sudo rm -f /tmp/db2-standby.txt; fi
+              if [[ -f /tmp/validate_db2.sh.log ]]; then sudo rm -f /tmp/validate_db2.sh.log; fi
+              if [[ -f /tmp/db2_val_ha.sh.log ]]; then sudo rm -f /tmp/db2_val_ha.sh.log; fi
+              if [[ -f /tmp/HADR_roles.txt ]]; then sudo rm -f /tmp/HADR_roles.txt; fi
+              if [[ -f /tmp/cur_db_role.txt ]]; then sudo rm -f /tmp/cur_db_role.txt; fi
+              LOGDIR="{{ logsdir }}"
+              echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh
+              . /tmp/include_db2
+              log_roll ${MAINLOG}
+              cat /tmp/db2ilist.lst | grep -v db2cln
       register: db2ilist
+      when: dbaction != "status"
       tags: always
 
-    - name: Info - Available DB2 Instances
+    - name: "Info - Action {{ dbaction }} will be performed on following Db2 Instance(s)"
       debug: msg="{{ db2ilist.stdout_lines }}"
+      when: dbaction != "status"
       tags: listinst,info
     
     - name: Run - Check Current db2 database Roles
-      script: "check_db_roles.sh {{ item }}"
+      command: "{{ scriptsdir }}/check_db_roles.sh {{ item }}"
       become: true
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
@@ -56,12 +69,17 @@
     - name: Get - HADR Roles
       shell: |
               if [[ $(cat /tmp/db2-role.txt | grep -i primary | wc -l) -gt 0 ]]; then
-                echo "$(cat /tmp/db2-role.txt | grep -i primary | head -1)" > /tmp/db_role.txt
+                PSTANDBY=$(cat /tmp/db2-role.txt | awk '{print $2}')
+                ROLE=$(cat /tmp/db2-role.txt | awk '{print $1}')
+                STANDBYHOST=$(nslookup ${PSTANDBY} | grep -i name | cut -d ":" -f2 | awk '{print $1}')
+
+                echo "${ROLE} ${STANDBYHOST}" > /tmp/cur_db_role.txt
+                #echo "PRIMARY ftwlxtstt004.iss.bnr.com" > /tmp/cur_db_role.txt
               else
-                echo "NOTPRIMARY NA" > /tmp/db_role.txt
-                #echo "PRIMARY {{ inventory_hostname }}" > /tmp/db_role.txt
+                echo "NOTPRIMARY NA" > /tmp/cur_db_role.txt
+                #echo "PRIMARY {{ inventory_hostname }}" > /tmp/cur_db_role.txt
               fi
-              cat /tmp/db_role.txt
+              cat /tmp/cur_db_role.txt
       register: hadrout
       tags: validateha
       when: dbaction != "status"
@@ -91,7 +109,7 @@
     - name: Block for stop DB2 Database and Instances.
       block:
         - import_tasks: failover_db2.yml
-          delegate_to: "{{ DBSTDBYHOST }}"
+          #delegate_to: "{{ DBSTDBYHOST }}"
           when: DBROLE == "PRIMARY"
           tags: failover
 
@@ -106,10 +124,12 @@
       tags: validate
 
     - name: Remove - Scripts from Target directory
-      file: path="/tmp/{{ item }}" state=absent
+      file: path="{{ scriptsdir }}/{{ item }}" state=absent
       loop: "{{ scriptstocopy }}"
+      when: dbaction != "status"
       tags: cleanup      
       
     - file: path="{{ item }}" state=absent
       loop: ['/tmp/include_db2']
+      when: dbaction != "status"
       tags: cleanup

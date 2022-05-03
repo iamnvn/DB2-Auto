@@ -6,10 +6,16 @@
 dirstocreate:
     - "{{ tgtdir }}"
     - "{{ tgtdir }}/logs"
+    - "{{ tgtdir }}/scripts"
 
 scriptstocopy:
+    - start_db2.sh
+    - stop_db2.sh
+    - check_db_roles.sh
+
+valscripts:
     - db2_val.sh
     - validateHADRTSA.sh
-    #- failover.sh
-    #- start_db2.sh
-    #- stop_db2.sh
+
+scriptsdir: "{{ tgtdir }}/scripts"
+logsdir: "{{ tgtdir }}/logs"

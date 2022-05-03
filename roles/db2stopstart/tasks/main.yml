@@ -53,7 +53,7 @@
       when: dbaction != "status"
       tags: always
 
-    - name: "Info - Action {{ dbaction }} will be performed on following Db2 Instance(s)"
+    - name: "Info - Action \"{{ dbaction }}\" will be performed on following Db2 Instance(s)"
       debug: msg="{{ db2ilist.stdout_lines }}"
       when: dbaction != "status"
       tags: listinst,info

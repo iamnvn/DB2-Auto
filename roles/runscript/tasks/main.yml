@@ -75,7 +75,7 @@
       register: cmdout
       tags: output
 
-    - name: "Display - Output of \"{{ scripttorun }}\" from \"{{ inventory_hostname }}\""
+    - name: "Display - Output of \"{{ scripttorun }}\""
       debug: msg="{{ cmdout.stdout_lines }}"
       tags: output
 

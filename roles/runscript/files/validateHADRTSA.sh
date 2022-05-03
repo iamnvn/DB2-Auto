@@ -1,19 +1,30 @@
 #!/bin/bash
 ### File Name    : validateHADRTSA.sh
 ### About        : Monitoring db2 HADR/TSA status
-### Author       :
-###              :
-### Author       :
+### Author       : ECMoC DBA Team
+###                Created/re-using  this as part of db2upgrade
+### Author       : ECMoC DBA Team
+### Version Changes : 04-FEB-2020
 
 this_pgm=validateHADRTSA
 server=`uname -n | cut -d'.' -f1`
 mmdd=`date +%Y%m%d_%H%M%S`
 banner='**************************************************************************'
 
-db2profileF=${HOME}/sqllib/db2profile
-scriptPath=/tmp/
-scriptLogs=${scriptPath}${this_pgm}.rpt
-tempLogs=${scriptLogs}
+#env_file="/opt/db2psirt/db2installer/environment.sh"       # Export program variables
+#  if [[ -s ${env_file} ]]; then
+#     . ${env_file}
+#  else
+#    echo "Environment file does not exist, program terminating"
+#    echo "The environment file ( ${env_file} ) sets environmental variables required by $0"
+#    exit "99"
+#fi
+
+ db2profileF=${HOME}/sqllib/db2profile
+
+ scriptPath=/tmp/
+ scriptLogs=${scriptPath}${this_pgm}.rpt
+ tempLogs=${scriptLogs}
 
 out_log=${scriptLogs}/${this_pgm}_${mmdd}.out
 out_tmp=${scriptLogs}/${this_pgm}_${mmdd}.tmp
@@ -28,6 +39,8 @@ ChkCrt_ReportDir ( )
         if [[ ! -d ${scriptLogs} ]] ; then
           echo "Report directory ${scriptLogs} does not exists, creating the same"
           mkdir -m 777 -p ${scriptLogs}
+		else
+		  chmod -fR 777 ${scriptLogs}
         fi
 }
 
@@ -80,14 +93,14 @@ fi
 
 Check_hadrRole ( )
 {
-
-countRole=`for DBN in $(db2 list db directory |grep "Database name" |sort | uniq | awk '{print $NF}'); do db2 "get db cfg for ${DBN}" | grep -i 'HADR database role' ; done  | cut -d '=' -f2 | sort -u |wc -l`
+  #for DBN in $(db2 list db directory | awk 'BEGIN{RS=ORS="\n\n";FS=OFS="\n"}/Indirect/' | awk '/alias/{print $NF}') 
+countRole=`for DBN in $(db2 list db directory | awk 'BEGIN{RS=ORS="\n\n";FS=OFS="\n"}/Indirect/' | awk '/alias/{print $NF}'); do db2 "get db cfg for ${DBN}" | grep -i 'HADR database role' ; done  | cut -d '=' -f2 | sort -u |wc -l`
 #countRole=`echo ${dbRole} | wc -l`
 #echo " ${dbRole} "  ## For testing
 if [[ ${countRole} -eq 0 ]] ; then
      OUTPUT1="Database Manager or HADR services or databases are not activated, Please validate "
 elif [[ ${countRole} -eq 1 ]] ; then  ## if 1 -- Start
-    dbRole=`for DBN in $(db2 list db directory |grep "Database name" |sort | uniq | awk '{print $NF}'); do db2 "get db cfg for ${DBN}" | grep -i 'HADR database role' ; done  | cut -d '=' -f2 | sort -u|sed 's/ //g'`
+    dbRole=`for DBN in $(db2 list db directory | awk 'BEGIN{RS=ORS="\n\n";FS=OFS="\n"}/Indirect/' | awk '/alias/{print $NF}'); do db2 "get db cfg for ${DBN}" | grep -i 'HADR database role' ; done  | cut -d '=' -f2 | sort -u|sed 's/ //g'`
         if [[ "${dbRole}" == "STANDARD" ]] ; then   ## if 2 -- Start
          OUTPUT1="STANDALONE"
         elif [[ "${dbRole}" == "PRIMARY" || "${dbRole}" == "STANDBY" ]] ; then
@@ -108,19 +121,19 @@ elif [[ ${countRole} -eq 1 ]] ; then  ## if 1 -- Start
           ###
 
           if [[ ${statusTSA} == "ONLINE" ]] ; then
-          #ipp=`lssam | grep -i 'ServiceIP' | grep -i 'online'  | tail -1 | cut -d ':' -f2 | sed 's/\-rs//g' | sed 's/db2ip\_//g' | sed 's/\_/./g'`
-          #rCheck=`ifconfig | grep -i $ipp | wc -l`
+          ipp=`lssam | grep -i 'ServiceIP' | grep -i 'online'  | tail -1 | cut -d ':' -f2 | sed 's/\-rs//g' | sed 's/db2ip\_//g' | sed 's/\_/./g'`
+          rCheck=`ifconfig | grep -i $ipp | wc -l`
           chklssam=`lssam | grep -iP 'Lock|SuspendedPropagated' | wc -l`
               if [[ ${chklssam} -eq 0 ]] ; then
                     stsLssam="OK"
                   else
                     stsLssam="*NOT OK"
-                    rclssam=2;
+                        rclssam=2;
                   fi
           else
           statusTSA="*${statusTSA}"
-          rcTSA=2;
-          #rCheck=1
+      rcTSA=2;
+          rCheck=1
           fi
         else
                 statusTSA="Not configured"
@@ -129,14 +142,12 @@ elif [[ ${countRole} -eq 1 ]] ; then  ## if 1 -- Start
           echo "Cluster Manager: ${ClsManagerS}"  >>  ${out_tmp2}
           echo "LSSAM          : ${stsLssam}   "  >>  ${out_tmp2}
 
-          #if [[ ( ${isTSA} -eq 0 && "${dbRole}" == "PRIMARY" ) || ( ${rCheck} -eq 1 && "${dbRole}" == "PRIMARY" ) ]] ; then
-          if [[ "${dbRole}" == "PRIMARY"  ]] ; then
+          if [[ ( ${isTSA} -eq 0 && "${dbRole}" == "PRIMARY" ) || ( ${rCheck} -eq 1 && "${dbRole}" == "PRIMARY" ) ]] ; then
                 OUTPUT1="PRIMARY"
           else
                 OUTPUT1="STANDBY"
           fi
-
-                ##Check HADR Status -- End
+          ##Check HADR Status -- End
         else
             OUTPUT1="Unknow DB role ${dbRole}, please check"
         fi      ## if 2 -- end
@@ -176,7 +187,7 @@ Check_hadrRole
            Clean_Up
            echo ";${rcTSA}" > ${out_tmp1}
            echo ";${rclssam}" >> ${out_tmp1}
-                  for DBN in $(db2 list db directory |grep "Database name" |sort | uniq | awk '{print $NF}')
+                  for DBN in $(db2 list db directory | awk 'BEGIN{RS=ORS="\n\n";FS=OFS="\n"}/Indirect/' | awk '/alias/{print $NF}')
                   do
                       #echo "Database: ${DBN}" >>  ${out_tmp2}
                           tList=`db2 "get db cfg for ${DBN}" | grep -iw 'HADR_TARGET_LIST' | cut -d '=' -f2 |sed 's/ //g'`
@@ -207,7 +218,7 @@ Check_hadrRole
                 echo ";${rcTSA}" > ${out_tmp1}  #Add TSA Status to chcek
                 echo ";${rclssam}" >> ${out_tmp1}
            #Check if DR setUP
-                  for DBN in $(db2 list db directory |grep "Database name" |sort | uniq | awk '{print $NF}')
+                  for DBN in $(db2 list db directory | awk 'BEGIN{RS=ORS="\n\n";FS=OFS="\n"}/Indirect/' | awk '/alias/{print $NF}')
                   do
            check_HADRS ${DBN}
                   done
@@ -225,7 +236,7 @@ Check_hadrRole
 
            "MIXED")
            OUTPUT="Noticed Mixed HADR roles, please validate"
-           for DBN in $(db2 list db directory |grep "Database name" |sort | uniq | awk '{print $NF}'); do role=`db2 "get db cfg for ${DBN}" | grep -i 'HADR database role' | cut -d '=' -f2 |sed 's/ //g'`  ; echo ${DBN}:${role}; done >>  ${out_tmp2}
+           for DBN in $(db2 list db directory | awk 'BEGIN{RS=ORS="\n\n";FS=OFS="\n"}/Indirect/' | awk '/alias/{print $NF}'); do role=`db2 "get db cfg for ${DBN}" | grep -i 'HADR database role' | cut -d '=' -f2 |sed 's/ //g'`  ; echo ${DBN}:${role}; done >>  ${out_tmp2}
        RETURN=${CRITICAL}
            ;;
 
@@ -438,4 +449,3 @@ Print_Header
 setdb2env
 CheckHADR
 returnexit
-

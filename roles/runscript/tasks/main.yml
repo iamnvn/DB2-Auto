@@ -6,7 +6,6 @@
     - set_fact:
          scripttype: "{{ scripttorun.split('.')[1] }}"
          script: "{{ scripttorun | basename }}"
-         #db2ilist: "{{ db2inst | default('') }}"
       tags: always
 
     - name: Copy - Script to target node
@@ -14,23 +13,69 @@
       ignore_errors: true
       tags: copy
 
-    - import_tasks: run_as_all_incs.yml
-      when: db2inst == "all"
+    - name: Get db2 instances
+      shell: |
+              DB2INST="{{ db2inst }}"
+              if [[ "${DB2INST}" == "all" ]]; then
+                /usr/local/bin/db2ls |  tail -n +4 | awk '{print $1}' |while read inst; do $inst/instance/db2ilist; done > /tmp/db2ilist.lst
+              else
+                echo "${DB2INST}" > /tmp/db2ilist.lst;
+              fi
+              chmod 777 /tmp/db2ilist.lst;
+              LOGDIR="{{ logsdir }}"
+              echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh
+              cat /tmp/db2ilist.lst | grep -v db2cln
+      register: db2ilist
+      tags: always
 
-    - import_tasks: run_as_one_inc.yml
-      when: db2inst != "all"
+    - name: "Info - Script \"{{ scripttorun }}\" will run with on following Db2 Instance(s)"
+      debug: msg="{{ db2ilist.stdout_lines }}"
+      tags: listinst,info
+
+    - command: date +'%Y%m%d%H%M%S'
+      register: timestamp 
+    
+    - set_fact:
+        curtmstmp: "{{ timestamp.stdout }}"
+
+    - name: Run - Script on target nodes
+      shell: |
+             #/tmp/{{ script }} {{ arg1 }} {{ arg2 }} >> /tmp/{{ script }}_out.txt
+             perl -p -i -e 's/\r//g' /tmp/{{ script }}
+             /tmp/{{ script }} >> /tmp/{{ script }}_out_{{ curtmstmp }}.txt
+             chmod -f 777 /tmp/{{ script }}_out_{{ curtmstmp }}.txt
+      register: cmdout
+      when: (scripttype == "sh") or (scripttype == "ksh")
+      failed_when: cmdout.rc > 1
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: run
+
+    - name: Run - DB2 Script on target node - ALL Instances
+      shell: |
+             . $HOME/sqllib/db2profile
+             db2 -tvf /tmp/{{ script }} >> /tmp/{{ script }}_out_{{ curtmstmp }}.txt
+             chmod -f 777 /tmp/{{ script }}_out_{{ curtmstmp }}.txt
+      register: cmdout       
+      when: (scripttype == "sql") or (scripttype == "db2")
+      failed_when: cmdout.rc > 1
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: run
 
     - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"
-      fetch: src="/tmp/{{ script }}_out.txt" dest="{{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}.txt" flat=yes
+      fetch: src="/tmp/{{ script }}_out_{{ curtmstmp }}.txt" dest="{{ fetchdir }}/{{ script }}_out_{{ curtmstmp }}_{{ inventory_hostname }}.txt" flat=yes
       ignore_errors: true
       tags: fetch
 
     - name: Get - Output
-      command: "cat {{ fetchdir }}/{{ script }}_out_{{ inventory_hostname }}.txt"
+      command: "cat {{ fetchdir }}/{{ script }}_out_{{ curtmstmp }}_{{ inventory_hostname }}.txt"
       register: cmdout
       tags: output
 
-    - name: Display - Output
+    - name: "Display - Output of \"{{ scripttorun }}\" from \"{{ inventory_hostname }}\""
       debug: msg="{{ cmdout.stdout_lines }}"
       tags: output
 
@@ -38,5 +83,5 @@
       file: path="{{ item }}" state=absent
       loop:
         - "/tmp/{{ script }}"
-        - "/tmp/{{ script }}_out.txt"
+        - "/tmp/{{ script }}_out_{{ curtmstmp }}.txt"
       tags: cleanup

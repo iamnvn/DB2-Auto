@@ -2,7 +2,7 @@
 scripttorun: sample.sh
 targethost: all
 fetchdir: /tmp
-arg1: "{{ sampledb | default('') }}"
-arg2: "{{ full | default('') }}"
+arg1: "{{ '' | default('') }}"
+arg2: "{{ '' | default('') }}"
 db2inst: all
-logsdir: /tmp
+logsdir: /db/exp/ansible/logs

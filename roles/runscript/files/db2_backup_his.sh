@@ -8,6 +8,7 @@
 SCRIPTNAME=get-backup_his.sh
 HNAME=$(hostname -s)
 HVERSION=$(uname -s)
+DB2INST=$(whoami)
 
 #Source db2profile
     if [[ -f $HOME/sqllib/db2profile ]]; then
@@ -32,21 +33,26 @@ function list_dbs {
 DBNAME=$1
 BCAKUPTPE=$(echo $2 | tr A-Z a-z)
 
-if [[ -z "${DBNAME}" || "${DBNAME}" != "all" ]]; then
+if [[ "${DBNAME}" != "all" ]]; then
+    echo "${DBNAME}" > /tmp/${DB2INST}.db.lst
+elif [[ ! -z ${DBNAME} && "${DBNAME}" != "all" ]]; then
     echo "${DBNAME}" > /tmp/${DB2INST}.db.lst
 else
     list_dbs
 fi
 
 
-cat /tmp/${DB2INST}.db.lst | while read DBNAME
+while read DBNAME
 do
+
+    echo "Database Name: ${DBNAME}"
+    echo "----------------------------"
     DBROLE=$(db2 get db cfg for ${DBNAME} | grep -i "HADR database role" | cut -d "=" -f2 | awk '{print $1}')
     if [[ "${DBROLE}" == "PRIMARY" || "${DBROLE}" == "STANDARD" ]]; then
         db2 "connect to ${DBNAME}" > /dev/null
         RC=$?
         if [[ ${RC} -eq 0 ]]; then
-            if [[ "${BCAKUPTPE}" == "full" | "${BCAKUPTPE}" == "f" ]]; then
+            if [[ "${BCAKUPTPE}" == "full" || "${BCAKUPTPE}" == "f" ]]; then
                 db2 "SELECT CURRENT SERVER AS DBNAME,
                     CASE DBH.OPERATIONTYPE
                         WHEN 'D' THEN 'DELTA OFFLINE'
@@ -67,7 +73,7 @@ do
                     FETCH FIRST 7 ROWS ONLY WITH UR"
                 db2 -x terminate > /dev/null
 
-            elif [[ "${BCAKUPTPE}" == "incremental" ]]; then
+            elif [[ "${BCAKUPTPE}" == "incremental" || "${BCAKUPTPE}" == "i" ]]; then
         
                 db2 "SELECT CURRENT SERVER AS DBNAME,
                     CASE DBH.OPERATIONTYPE
@@ -118,5 +124,5 @@ do
     else
         echo "${DBNAME} - Standby"
     fi
-done
-rm -rf /tmp/${DB2INST}.db.lst
+done < /tmp/${DB2INST}.db.lst
+#rm -rf /tmp/${DB2INST}.db.lst

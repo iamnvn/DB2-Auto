@@ -38,7 +38,7 @@
     - set_fact:
         curtmstmp: "{{ timestamp.stdout }}"
 
-    - name: Run - Script on target nodes
+    - name: "Run - Shell Script - \"{{ scripttorun }}\" on target nodes"
       shell: |
              #/tmp/{{ script }} {{ arg1 }} {{ arg2 }} >> /tmp/{{ script }}_out.txt
              perl -p -i -e 's/\r//g' /tmp/{{ script }}
@@ -52,7 +52,7 @@
       loop: "{{ db2ilist.stdout_lines }}"
       tags: run
 
-    - name: Run - DB2 Script on target node - ALL Instances
+    - name: "Run - DB2 Script - \"{{ scripttorun }}\" on target node"
       shell: |
              . $HOME/sqllib/db2profile
              db2 -tvf /tmp/{{ script }} >> /tmp/{{ script }}_out_{{ curtmstmp }}.txt
@@ -71,7 +71,7 @@
       tags: fetch
 
     - name: Get - Output
-      command: "cat {{ fetchdir }}/{{ script }}_out_{{ curtmstmp }}_{{ inventory_hostname }}.txt"
+      command: "cat {{ fetchdir }}/{{ script }}_out_{{ curtmstmp }}.txt"
       register: cmdout
       tags: output
 
@@ -79,7 +79,7 @@
       debug: msg="{{ cmdout.stdout_lines }}"
       tags: output
 
-    - name: Remove - Files from target nodes.
+    - name: Remove - Files from target nodes
       file: path="{{ item }}" state=absent
       loop:
         - "/tmp/{{ script }}"

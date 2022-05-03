@@ -8,11 +8,6 @@
          script: "{{ scripttorun | basename }}"
       tags: always
 
-    - name: Copy - Script to target node
-      copy: src="{{ scripttorun }}" dest="/tmp/{{ script }}" mode=0755
-      ignore_errors: true
-      tags: copy
-
     - name: Get db2 instances
       shell: |
               DB2INST="{{ db2inst }}"
@@ -23,10 +18,16 @@
               fi
               chmod 777 /tmp/db2ilist.lst;
               LOGDIR="{{ logsdir }}"
+              sudo mkdir -m 777 -p ${LOGDIR}
               echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh
               cat /tmp/db2ilist.lst | grep -v db2cln
       register: db2ilist
       tags: always
+
+    - name: Copy - Script to target node
+      copy: src="{{ scripttorun }}" dest="{{ logsdir }}/{{ script }}" mode=0755
+      ignore_errors: true
+      tags: copy
 
     - name: "Info - Script \"{{ scripttorun }}\" will run with on following Db2 Instance(s)"
       debug: msg="{{ db2ilist.stdout_lines }}"
@@ -42,8 +43,8 @@
       shell: |
              #/tmp/{{ script }} {{ arg1 }} {{ arg2 }} >> /tmp/{{ script }}_out.txt
              perl -p -i -e 's/\r//g' /tmp/{{ script }}
-             /tmp/{{ script }} >> /tmp/{{ script }}_out_{{ curtmstmp }}.txt
-             chmod -f 777 /tmp/{{ script }}_out_{{ curtmstmp }}.txt
+             {{ logsdir }}/{{ script }} {{ arg1 }} {{ arg2 }} >> {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
+             chmod -f 777 {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
       register: cmdout
       when: (scripttype == "sh") or (scripttype == "ksh")
       failed_when: cmdout.rc > 1
@@ -55,8 +56,8 @@
     - name: "Run - DB2 Script - \"{{ scripttorun }}\" on target node"
       shell: |
              . $HOME/sqllib/db2profile
-             db2 -tvf /tmp/{{ script }} >> /tmp/{{ script }}_out_{{ curtmstmp }}.txt
-             chmod -f 777 /tmp/{{ script }}_out_{{ curtmstmp }}.txt
+             db2 -tvf {{ logsdir }}/{{ script }} >> {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
+             chmod -f 777 {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
       register: cmdout       
       when: (scripttype == "sql") or (scripttype == "db2")
       failed_when: cmdout.rc > 1
@@ -66,7 +67,7 @@
       tags: run
 
     - name: "Fetch - Out file from target node to controller - {{ fetchdir }} dir"
-      fetch: src="/tmp/{{ script }}_out_{{ curtmstmp }}.txt" dest="{{ fetchdir }}/{{ script }}_out_{{ curtmstmp }}_{{ inventory_hostname }}.txt" flat=yes
+      fetch: src="{{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt" dest="{{ fetchdir }}/{{ script }}_out_{{ curtmstmp }}_{{ inventory_hostname }}.txt" flat=yes
       ignore_errors: true
       tags: fetch
 
@@ -82,6 +83,6 @@
     - name: Remove - Files from target nodes
       file: path="{{ item }}" state=absent
       loop:
-        - "/tmp/{{ script }}"
-        - "/tmp/{{ script }}_out_{{ curtmstmp }}.txt"
+        - "{{ logsdir }}/{{ script }}"
+        #- "/tmp/{{ script }}_out_{{ curtmstmp }}.txt"
       tags: cleanup

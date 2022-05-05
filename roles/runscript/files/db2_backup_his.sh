@@ -33,14 +33,11 @@ function list_dbs {
 DBNAME=$1
 BCAKUPTPE=$(echo $2 | tr A-Z a-z)
 
-if [[ "${DBNAME}" != "all" ]]; then
-    echo "${DBNAME}" > /tmp/${DB2INST}.db.lst
-elif [[ ! -z ${DBNAME} && "${DBNAME}" != "all" ]]; then
+if [[ ! -z ${DBNAME} && "${DBNAME}" != "all" ]]; then
     echo "${DBNAME}" > /tmp/${DB2INST}.db.lst
 else
     list_dbs
 fi
-
 
 while read DBNAME
 do

@@ -42,7 +42,7 @@
     - name: "Run - Shell Script - \"{{ scripttorun }}\" on target nodes"
       shell: |
              #/tmp/{{ script }} {{ arg1 }} {{ arg2 }} >> /tmp/{{ script }}_out.txt
-             perl -p -i -e 's/\r//g' /tmp/{{ script }}
+             perl -p -i -e 's/\r//g' {{ logsdir }}/{{ script }}
              {{ logsdir }}/{{ script }} {{ arg1 }} {{ arg2 }} >> {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
              chmod -f 777 {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
       register: cmdout
@@ -56,6 +56,7 @@
     - name: "Run - DB2 Script - \"{{ scripttorun }}\" on target node"
       shell: |
              . $HOME/sqllib/db2profile
+             perl -p -i -e 's/\r//g' {{ logsdir }}/{{ script }}
              db2 -tvf {{ logsdir }}/{{ script }} >> {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
              chmod -f 777 {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
       register: cmdout       

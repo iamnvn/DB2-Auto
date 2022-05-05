@@ -10,8 +10,6 @@
 - name: DB2 Fixpack upgrade on host group - {{ target_server }}
   hosts: "{{ target_server | default('empty_group') }}"
   gather_facts: no
-  become: yes
-  #become_user: "{{ ansible_user }}"
 
   roles:
-     - db2fixpack
+     - db2fixpack_bms

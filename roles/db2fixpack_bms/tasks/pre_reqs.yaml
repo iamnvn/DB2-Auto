@@ -1,0 +1,33 @@
+---
+## pre-req tasks
+
+- name: Create - Directory Structure
+  file: path="{{ item }}" state=directory mode=0777
+  loop: "{{ dirstocreate }}"
+  tags: createdirs
+
+- name: Copy - Comman functions and variables file
+  template: src="include_db2.sh" dest="/tmp/include_db2" mode=0777
+  tags: copytemplate
+
+#- name: Copy - binaries to target nodes
+#  copy: src="{{ swlocaldir }}/{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
+#  delegate_to: "{{ centralhost }}"
+#  when: copybinaries | bool
+#  tags: copybinaries
+
+- name: Copy - binaries to target nodes
+  synchronize: src="{{ swlocaldir }}/{{ db2sw }}" dest="{{ binariesdir }}" mode=push
+  delegate_to: "{{ centralhost }}"
+  when: copybinaries | bool
+  tags: copybinaries
+
+- name: Unzip - db2binaries
+  unarchive: src="{{ binariesdir }}/{{ db2sw }}" dest="{{ binariesdir }}" remote_src=yes
+  when: copybinaries | bool
+  tags: copybinaries
+
+- name: Copy - Scrips to target node
+  copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
+  loop: "{{ scriptstocopy }}"
+  tags: copyscripts

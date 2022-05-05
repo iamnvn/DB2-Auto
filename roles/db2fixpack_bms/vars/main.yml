@@ -1,0 +1,10 @@
+---
+target_server: all
+tgtdir: /db/exp/ansible/db2fp
+tgtversion: v11.5
+tgtdb2inst: all
+pversion: MAY-2022
+copybinaries: no
+swlocaldir: /root/projects
+centralhost: localhost
+installupdate: install_update

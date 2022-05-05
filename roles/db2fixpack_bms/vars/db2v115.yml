@@ -1,0 +1,4 @@
+---
+db2vpath: /opt/IBM/db2/v11.5FP7
+db2sw: v11.1.4fp6_linuxx64_universal_fixpack.tar
+swtype: universal

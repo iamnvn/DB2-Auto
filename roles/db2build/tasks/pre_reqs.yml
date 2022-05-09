@@ -30,14 +30,39 @@
     - name: Copy - DB2 Binaries
       synchronize: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=push
       delegate_to: "{{ swsrchost }}"
+      register: copy_check
+      async: 3600
+      poll: 0
+
+    - name: Monitor - Copy binaries job
+      async_status:
+        jid: "{{ copy_check.ansible_job_id }}"
+      register: copy_check_result
+      until: copy_check_result.finished
+      retries: 60
+      delay: 40
 
     - name: Unzip - DB2 Binaries
       unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes
+      register: untar_check
+      async: 3600
+      poll: 0
       when: ansible_distribution != "AIX"
 
     - name: Unzip - DB2 Binaries
       unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes
+      register: untar_check
+      async: 3600
+      poll: 0
       when: ansible_distribution == "AIX"
+   
+    - name: Monitor - Untar binaries job
+      async_status:
+        jid: "{{ untar_check.ansible_job_id }}"
+      register: untar_result
+      until: untar_result.finished
+      retries: 60
+      delay: 50
    when: copybinaries | bool
    tags: copybinaries 
 

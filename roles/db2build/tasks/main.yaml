@@ -31,7 +31,7 @@
 
     - name: Monitor db2 installation job
       async_status:
-      jid: "{{ db2install_check.ansible_job_id }}"
+        jid: "{{ db2install_check.ansible_job_id }}"
       register: db2install_RESULT
       until: db2install_RESULT.finished
       retries: 60
@@ -52,7 +52,7 @@
       become: true
       become_method: sudo
       async_status:
-      jid: "{{ icrt_result.ansible_job_id }}"
+        jid: "{{ icrt_result.ansible_job_id }}"
       register:  db2icrt_result
       until: db2icrt_result.finished
       retries: 60

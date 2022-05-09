@@ -11,8 +11,8 @@
          fenc: "{{ createinst['fencid'] }}"
       tags: always
 
-    - debug: msg="{{ inst }}"
-      tags: always
+    #- debug: msg="{{ inst }}"
+    # tags: always
 
     - name: Run - DB2 Install (NOTSAMP)
       shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -f NOTSAMP -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"

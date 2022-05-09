@@ -25,7 +25,8 @@
    template: src="templates/include_db2.sh" dest="/tmp/include_db2" mode=0777
    tags: always
 
- - block:
+ - name: Copy and untar binaries block
+   block:
     - name: Copy - DB2 Binaries
       synchronize: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=push
       delegate_to: "{{ swsrchost }}"
@@ -36,10 +37,10 @@
     - name: Monitor - Copy binaries job
       async_status:
       jid: "{{ copy_check.ansible_job_id }}"
-      register: copy_result
-      until: copy_result.finished
+      register: copy_check_result
+      until: copy_check_result.finished
       retries: 60
-      delay: 50
+      delay: 40
 
     - name: Unzip - DB2 Binaries
       unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes

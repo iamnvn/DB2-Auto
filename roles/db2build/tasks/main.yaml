@@ -15,7 +15,7 @@
       tags: always
 
     - name: Run - DB2 Install
-      command: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
+      shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
       async: 3600
       poll: 0
       register: db2install_check
@@ -23,7 +23,7 @@
       tags: install
 
     - name: Run - DB2 Install (NOTSAMP)
-      command: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -f NOTSAMP -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
+      shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -f NOTSAMP -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
       async: 3600
       poll: 0
       register: db2install_check

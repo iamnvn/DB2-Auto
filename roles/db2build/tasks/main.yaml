@@ -43,7 +43,7 @@
       when: createinst['create'] | bool
       become: true
       become_method: sudo
-      asnc: 3600
+      async: 3600
       poll: 0
       register: icrt_result    
       tags: createinst

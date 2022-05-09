@@ -19,7 +19,7 @@
       async: 3600
       poll: 0
       register: db2install_check
-      when: installtsamp | bool
+      when: installtsamp == "yes"
       tags: install
 
     - name: Run - DB2 Install (NOTSAMP)
@@ -27,7 +27,7 @@
       async: 3600
       poll: 0
       register: db2install_check
-      when: not installtsamp
+      when: installtsamp == "no"
       tags: install
 
     - name: Monitor db2 installation job

@@ -41,12 +41,12 @@
 
     - name: Create - DB2 Instance
       shell: "{{ db2vpath }}/instance/db2icrt -u {{ fenc }} {{ inst }} > {{ logdir }}/{{ inst }}_db2icrt.log 2>&1"
+      register: icrt_result 
       when: createinst['create'] | bool
       become: true
       become_method: sudo
       async: 3600
-      poll: 0
-      register: icrt_result    
+      poll: 0   
       tags: createinst
 
     - name: Monitor db2 instance create job
@@ -57,7 +57,8 @@
       register:  db2icrt_result
       until: db2icrt_result.finished
       retries: 60
-      delay: 30    
+      delay: 30
+      when: createinst['create'] | bool    
 
     - name: Block to Run as Instace user
       block:

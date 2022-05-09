@@ -3,7 +3,7 @@
       tags: always
 
     - name: Run - Prereq Steps
-      import_tasks: pre_reqs.yaml
+      import_tasks: pre_reqs.yml
       tags: prereq
 
     - set_fact:
@@ -16,17 +16,47 @@
 
     - name: Run - DB2 Install
       shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
+      async: 3600
+      poll: 0
+      register: db2install_check
       when: installtsamp | bool
       tags: install
 
     - name: Run - DB2 Install (NOTSAMP)
       shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -f NOTSAMP -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
+      async: 3600
+      poll: 0
+      register: db2install_check
+      tags: install
+
+    - name: Monitor db2 installation job
+      async_status:
+      jid: "{{ db2install_check.ansible_job_id }}"
+      register: db2install_RESULT
+      until: db2install_RESULT.finished
+      retries: 60
+      delay: 40
       tags: install
 
     - name: Create - DB2 Instance
       shell: "{{ db2vpath }}/instance/db2icrt -u {{ fenc }} {{ inst }} > {{ logdir }}/{{ inst }}_db2icrt.log 2>&1"
       when: createinst['create'] | bool
-      tags: createinst 
+      become: true
+      become_method: sudo
+      asnc: 3600
+      poll: 0
+      register: icrt_result    
+      tags: createinst
+
+    - name: Monitor db2 instance create job
+      become: true
+      become_method: sudo
+      async_status:
+      jid: "{{ icrt_result.ansible_job_id }}"
+      register:  db2icrt_result
+      until: db2icrt_result.finished
+      retries: 60
+      delay: 30    
 
     - name: Block to Run as Instace user
       block:
@@ -64,4 +94,4 @@
 
       rescue:
         - name: ERROR
-          debug: "{{ inst }} Commands failed. Please Check"
+          fail: "{{ inst }} Commands failed. Please Check"

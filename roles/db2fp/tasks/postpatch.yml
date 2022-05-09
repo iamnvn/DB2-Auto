@@ -1,0 +1,7 @@
+---
+    - name: "Running - DB2 Postpatch (Post Backups to {{ bkpsdir }})"
+      command: "{{ scriptsdir }}/postpatch.sh {{ item }}"
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: postpatch

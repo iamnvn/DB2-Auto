@@ -50,9 +50,43 @@ $ ls -la | grep -i validateHADRTSA.sh
           mode: push
         delegate_to: "{{ repo_server | mandatory }}"
 
+/igs_swdepot/igs/MidrangeDBAServices/DB2/V11.5_Linux/V11.5_Mod7
 
-Perhaps you have ctrl-M (carriage returns) at the end of each line in your file.
 
-To view: cat -v /data/upgrade/upgrade_db.ksh
 
-To fix: perl -p -i -e "s/\r//g" /data/upgrade/upgrade_db.ksh
+
+
+
+
+/opt/IBM/db2/V11.5/FP7_SB13804   11.5.7.0        0                    1345    Mon Mar 14 20:53:29 2022 CDT             0
+/opt/IBM/db2/V10.5/FP11_SB41021  10.5.0.11       11                       9    Wed Apr  6 15:34:50 2022 CDT             0
+/opt/IBM/db2/V11.1/FP6_SB41025   11.1.4.6        6                       6    Sun Apr 10 12:04:20 2022 CDT             0
+
+
+
+we have to understand thta db2 backup report and prepare same in ANsible ..will have to be some script and SQL
+
+goal is check last 7 days any backups did not run report it and report last full and incremental backups and if anything missing list those as well - That's the reason i am asking for detailed requirement everything is going double work.
+
+yeap..I understand ...it is simple but we need to think smartly only ..
+
+Cant we use script which generates that report 
+
+
+inst
+hostname
+11.1.4.7
+11.1.4.6
+
+Okay, Will try to code this tomorrow, If you have that script already please share
+
+1.check last 7 days backups if not report 
+
+topaxdb2p002_db2racc1_arwp1000 - NO Full Backup
+
+2. report last full or incremental in this format
+
+Last Full Prod Backup > 4 days: topaxdb2p002_db2racc1_kcp01000 - Last Good Full 2022-04-03 05:30
+
+
+

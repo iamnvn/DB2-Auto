@@ -1,0 +1,109 @@
+---
+
+    - name: Copy - Comman functions and variables file
+      template: src="include_db2.sh" dest="/tmp/include_db2" mode=0777
+      tags: copytemplate
+
+    - name: Get - db2 instances
+      shell: |
+              DB2INST="{{ tgtdb2inst }}"
+              if [[ "${DB2INST}" == "all" ]]; then
+                /usr/local/bin/db2ls |  tail -n +4 | awk '{print $1}' |while read inst; do $inst/instance/db2ilist; done > /tmp/db2ilist.lst
+              else
+                echo "${DB2INST}" > /tmp/db2ilist.lst;
+              fi
+              chmod 777 /tmp/db2ilist.lst;
+              if [[ -f /tmp/db2-role.txt ]]; then sudo rm -f /tmp/db2-role.txt; fi
+              if [[ -f /tmp/db2-standby.txt ]]; then sudo rm -f /tmp/db2-standby.txt; fi
+              if [[ -f /tmp/tsamp_chk.txt ]]; then sudo rm -f /tmp/tsamp_chk.txt; fi
+              if [[ -f /tmp/validation.txt ]]; then sudo rm -f /tmp/validation.txt; fi
+              if [[ -f /tmp/HADR_roles.txt ]]; then sudo rm -f /tmp/HADR_roles.txt; fi
+              if [[ -f /tmp/cur_db_role.txt ]]; then sudo rm -f /tmp/cur_db_role.txt; fi
+              LOGDIR="{{ logsdir }}"
+              echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh
+              . /tmp/include_db2
+              log_roll ${MAINLOG}
+              cat /tmp/db2ilist.lst | grep -v db2cln
+      register: db2inlst
+      tags: always
+
+    - set_fact:
+        db2ilist: "{{ db2inlst }}"
+      tags: always
+
+    - name: "Info - DB2 Fixpack Version \"DB2 {{ tgtversion }}\" will be performed on \"{{ tgtdb2inst }}\" Db2 Instance(s)"
+      debug: msg="{{ db2ilist.stdout_lines }}"
+      tags: listinst,info
+
+    - name: Check - Validate server and user input
+      import_tasks: "validate_inputs.yml"
+      tags: prereq
+
+    - name: Run - Prereq Steps
+      import_tasks: "pre_reqs.yml"
+      tags: prereq
+
+    - name: Run - Check Current db2 database Roles
+      command: "{{ scriptsdir }}/check_db_roles.sh {{ item }}"
+      become: true
+      become_user: "{{ item }}"
+      loop: "{{ db2ilist.stdout_lines }}"
+      tags: checkdbrole
+
+    - name: Get - Current Server Role
+      shell: |
+              NOOFDBS=$(grep -c '' /tmp/db2-role.txt)
+              if [[ ${NOOFDBS} -eq $(grep -c 'STANDARD' /tmp/db2-role.txt) ]]; then
+                if [[ $(grep -c 'STANDARD' /tmp/db2-role.txt) -ne 0 ]]; then
+                  echo "STANDARD NA" > /tmp/cur_db_role.txt
+                fi
+
+              elif [[ ${NOOFDBS} -eq $(grep -c 'PRIMARY' /tmp/db2-role.txt) ]]; then
+                if [[ $(grep -c 'PRIMARY' /tmp/db2-role.txt) -ne 0 ]]; then
+                  PSTANDBY=$(cat /tmp/db2-role.txt | grep -i primary | awk '{print $2}')
+                  ROLE=PRIMARY
+                  STANDBYHOST=$(nslookup ${PSTANDBY} | grep -i name | cut -d ":" -f2 | awk '{print $1}')
+                  echo "${ROLE} ${STANDBYHOST}" > /tmp/cur_db_role.txt
+                fi
+
+              elif [[ ${NOOFDBS} -eq $(grep -c 'STANDBY' /tmp/db2-role.txt) ]]; then
+                if [[ $(grep -c 'STANDBY' /tmp/db2-role.txt) -ne 0 ]]; then
+                  PSTANDBY=$(cat /tmp/db2-role.txt | grep -i primary | awk '{print $2}')
+                  ROLE=STANDBY
+                  echo "${ROLE} NA" > /tmp/cur_db_role.txt
+                fi
+
+              elif [[ ${NOOFDBS} -gt $(grep -c 'PRIMARY' /tmp/db2-role.txt) ]]; then
+                if [[ $(grep -c 'PRIMARY' /tmp/db2-role.txt) -ne 0 ]]; then
+                  PSTANDBY=$(cat /tmp/db2-role.txt | grep -i primary | awk '{print $2}')
+                  ROLE=MIXED
+                  STANDBYHOST=$(nslookup ${PSTANDBY} | grep -i name | cut -d ":" -f2 | awk '{print $1}')
+                  echo "${ROLE} ${STANDBYHOST}" > /tmp/cur_db_role.txt
+                fi
+                
+              elif [[ ${NOOFDBS} -gt $(grep -c 'STANDBY' /tmp/db2-role.txt) ]]; then
+                if [[ $(grep -c 'STANDBY' /tmp/db2-role.txt) -ne 0 ]]; then
+                  ROLE=MIXED
+                  STANDBYHOST=MIXED
+                  echo "${ROLE} ${STANDBYHOST}" > /tmp/cur_db_role.txt
+                fi
+              fi
+
+      tags: getdbrole
+
+    - command: cat /tmp/cur_db_role.txt
+      register: hadrout
+      tags: getdbrole,install,update
+
+    - set_fact:
+       hadrop: "{{ hadrout.stdout.split(' ') }}"
+      tags: getdbrole,install,update
+
+    - set_fact:
+        DBROLE: "{{ hadrop.0 }}"
+        DBSTDBYHOST: "{{ hadrop.1 }}"
+      tags: validateha,install,update
+
+    - name: Info - Server Status
+      debug: msg="This Server={{ inventory_hostname }}, Databases Role={{ DBROLE }} and Standby Host={{ DBSTDBYHOST }}"
+      tags: info,install,update

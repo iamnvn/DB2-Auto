@@ -1,0 +1,57 @@
+---
+
+    - debug: msg="Play_hosts={{play_hosts}}"
+      run_once: true
+      tags: always
+
+    - include_vars: db2v111.yml
+      when: tgtversion == "v11.1"
+      tags: always
+
+    - include_vars: db2v115.yml
+      when: tgtversion == "v11.5"
+      tags: always
+
+    - include_vars: db2v105.yml
+      when: tgtversion == "v10.5"
+      tags: always
+
+    - name: Prepare - Target Environmet
+      import_tasks: prepare_env.yml
+      tags: always
+
+    - name: Block for DB2 StandAlone Servers Fixpack Upgrade.
+      block:
+        - import_tasks: db2fp_std_flow.yml
+
+      when: DBROLE == "STANDARD"
+      tags: standalonefp
+
+    - name: Block for DB2 Standby Servers Fixpack Upgrade.
+      block:
+        - import_tasks: db2fp_std_flow.yml
+        - import_tasks: failover.yml
+          when: installupdate == "update" or installupdate == "install_update"
+          tags: failover
+
+      when: DBROLE == "STANDBY"
+      tags: standbyfp
+
+    - name: Block for DB2 Primary Servers Fixpack Upgrade.
+      block:
+        - import_tasks: db2fp_std_flow.yml
+        - import_tasks: failover.yml
+          when: installupdate == "update" or installupdate == "install_update"
+          tags: failover
+      when: DBROLE == "PRIMARY"
+      tags: primaryfp
+
+    - name: Mixed DB2 Database Roles
+      debug: msg="Found MIXED DB2 Database Roles Please Make all Databases Primary/Standby/Standard"
+      when: DBROLE == "MIXED"
+
+    - import_tasks: validate_db2.yml
+      tags: validate
+
+    - import_tasks: cleanup.yml
+      tags: cleanup

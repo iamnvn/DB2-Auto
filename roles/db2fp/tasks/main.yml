@@ -1,0 +1,69 @@
+---
+
+    - debug: msg="Play_hosts={{play_hosts}}"
+      run_once: true
+      tags: always
+
+    - include_vars: db2v1116.yml
+      when: tgtversion == "v11.1.4.6"
+      tags: always
+
+    - include_vars: db2v1156.yml
+      when: tgtversion == "v11.5.6"
+      tags: always
+
+    - include_vars: db2v1157.yml
+      when: tgtversion == "v11.5.7"
+      tags: always
+
+    - include_vars: db2v10511.yml
+      when: tgtversion == "v10.5.11"
+      tags: always
+
+    - name: Prepare - Target Environmet
+      import_tasks: prepare_env.yml
+      tags: always
+
+    - name: Block for DB2 StandAlone Servers Fixpack Upgrade.
+      block:
+        - debug: msg="DB2 Fixpack upgrade Started for StandAlone / AxStandby Servers"
+          run_once: true
+        - import_tasks: db2fp_std_flow.yml
+
+      when: DBROLE == "STANDARD" or HADRSTATE == "REMOTE_CATCHUP"
+      tags: standalonefp
+
+    - name: Block for DB2 Standby Servers Fixpack Upgrade.
+      block:
+        - debug: msg="DB2 Fixpack upgrade Started for Principal Standby Servers"
+          run_once: true
+        - import_tasks: db2fp_std_flow.yml
+        - import_tasks: failover.yml
+          when: installupdate == "update" or installupdate == "install_update"
+          tags: failover
+
+      when: DBROLE == "STANDBY" and HADRSTATE == "PEER"
+      tags: standbyfp
+
+    - name: Block for DB2 Primary Servers Fixpack Upgrade.
+      block:
+        - debug: msg="DB2 Fixpack upgrade Started for Primary Servers"
+          run_once: true
+        - import_tasks: db2fp_std_flow.yml
+        - import_tasks: failover.yml
+          when: 
+            - installupdate == "update" or installupdate == "install_update"
+            - failback | bool
+          tags: failover
+      when: DBROLE == "PRIMARY"
+      tags: primaryfp
+
+    - name: Mixed DB2 Database Roles
+      debug: msg="Found MIXED DB2 Database Roles Please Make all Databases Primary/Standby/Standard"
+      when: DBROLE == "MIXED"
+
+    - import_tasks: validate_db2.yml
+      tags: validate
+
+    - import_tasks: cleanup.yml
+      tags: cleanup

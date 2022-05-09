@@ -34,13 +34,13 @@
       async: 3600
       poll: 0
 
-    - name: Monitor - Copy binaries job
-      async_status:
-      jid: "{{ copy_check.ansible_job_id }}"
-      register: copy_check_result
-      until: copy_check_result.finished
-      retries: 60
-      delay: 40
+    #- name: Monitor - Copy binaries job
+    #  async_status:
+    #  jid: "{{ copy_check.ansible_job_id }}"
+    #  register: copy_check_result
+    #  until: copy_check_result.finished
+    #  retries: 60
+    #  delay: 40
 
     - name: Unzip - DB2 Binaries
       unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes

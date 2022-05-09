@@ -26,7 +26,13 @@
    tags: always
 
  - name: Copy - DB2 Binaries
-   copy: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
+   synchronize: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=push
+   delegate_to: "{{ swsrchost }}"
+   when: copybinaries | bool
+   tags: copybinaries
+
+ #- name: Copy - DB2 Binaries
+  # copy: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
    #delegate_to: "{{ swsrchost }}"
    #become: true
    #become_user: root

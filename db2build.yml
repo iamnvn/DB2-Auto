@@ -5,7 +5,8 @@
 - name: DB2 Standard build on host or group
   hosts: "{{ target_server | default('empty_group') }}"
   gather_facts: yes
-  become: yes
+  become: true
+  become_method: sudo
   #become_user: "{{ ansible_user }}"
 
   roles:

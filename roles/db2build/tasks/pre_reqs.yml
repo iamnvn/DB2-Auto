@@ -25,29 +25,45 @@
    template: src="templates/include_db2.sh" dest="/tmp/include_db2" mode=0777
    tags: always
 
- - name: Copy - DB2 Binaries
-   synchronize: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=push
-   delegate_to: "{{ swsrchost }}"
-   become: true
-   when: copybinaries | bool
-   tags: copybinaries
+ - block:
+    - name: Copy - DB2 Binaries
+      synchronize: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=push
+      delegate_to: "{{ swsrchost }}"
+      register: copy_check
+      async: 3600
+      poll: 0
 
- #- name: Copy - DB2 Binaries
-  # copy: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=0755
-   #delegate_to: "{{ swsrchost }}"
-   #become: true
-   #become_user: root
-   tags: copybinaries
+    - name: Monitor - Copy binaries job
+      async_status:
+      jid: "{{ copy_check.ansible_job_id }}"
+      register: copy_result
+      until: copy_result.finished
+      retries: 60
+      delay: 50
 
- - name: Unzip - DB2 Binaries
-   unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes
-   when: ansible_distribution != "AIX"
-   tags: copybinaries
+    - name: Unzip - DB2 Binaries
+      unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes
+      register: untar_check
+      async: 3600
+      poll: 0
+      when: ansible_distribution != "AIX"
+
+    - name: Unzip - DB2 Binaries
+      unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes
+      register: untar_check
+      async: 3600
+      poll: 0
+      when: ansible_distribution == "AIX"
    
- - name: Unzip - DB2 Binaries
-   shell: cd "{{ binariesdir }}";tar -xzvf "{{ binariesdir }}/{{ swtocopy }}"
-   when: ansible_distribution == "AIX"
-   tags: copybinaries
+    - name: Monitor - Untar binaries job
+      async_status:
+      jid: "{{ untar_check.ansible_job_id }}"
+      register: untar_result
+      until: untar_result.finished
+      retries: 60
+      delay: 50
+   when: copybinaries | bool
+   tags: copybinaries 
 
  - name: Copy - DB2 Standard Scrips
    copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755

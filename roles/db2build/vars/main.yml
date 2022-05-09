@@ -7,13 +7,13 @@ swlocaldir: /root/DB2Binaries
 swtocopy: v11.1.1fp1_linuxx64_universal_fixpack.tar.gz
 swtype: universal
 db2vpath: /opt/IBM/db2/11.1
-installtsamp: yes
+installtsamp: true
 licfile: db2ese.lic
-copybinaries: yes
+copybinaries: true
 
 ## Crate instance vars.
 createinst:
-  create: yes
+  create: true
   instid: db2bbi1
   fencid: db2udf
   instgrp: dba
@@ -21,7 +21,7 @@ createinst:
 
 ## Crate database related vars.
 createdb:
-  create: yes
+  create: true
   name: TESTDB
   datadir: /db/data
   dbdir: /db/dbdir

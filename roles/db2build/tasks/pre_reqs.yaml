@@ -28,6 +28,7 @@
  - name: Copy - DB2 Binaries
    synchronize: src="{{ db2sw }}" dest="{{ binariesdir }}" mode=push
    delegate_to: "{{ swsrchost }}"
+   become: true
    when: copybinaries | bool
    tags: copybinaries
 

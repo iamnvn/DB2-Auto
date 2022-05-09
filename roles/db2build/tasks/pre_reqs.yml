@@ -33,25 +33,12 @@
 
     - name: Unzip - DB2 Binaries
       unarchive: src="{{ binariesdir }}/{{ swtocopy }}" dest="{{ binariesdir }}" remote_src=yes
-      register: untar_check
-      async: 3600
-      poll: 0
       when: ansible_distribution != "AIX"
 
     - name: Unzip - DB2 Binaries
       shell: cd "{{ binariesdir }}";tar -xzvf "{{ binariesdir }}/{{ swtocopy }}"
-      register: untar_check
-      async: 3600
-      poll: 0
       when: ansible_distribution == "AIX"
-   
-    - name: Monitor - Untar binaries job
-      async_status:
-        jid: "{{ untar_check.ansible_job_id }}"
-      register: untar_result
-      until: untar_result.finished
-      retries: 60
-      delay: 50
+         
    when: copybinaries | bool
    tags: copybinaries 
 

@@ -89,9 +89,10 @@ function activatedb {
 
 function db_hadr {
 
-	STANDBYCOUNT=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST | wc -l | awk '{print $1}')
+	  DBROLE=$(db2 get db cfg for ${DBNAME} | grep HADR_ROLE | awk '{print $3}' | head -1)
+    STANDBYCOUNT=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST | wc -l | awk '{print $1}')
 		DBCONNOP=$(db2 -ec +o connect to ${DBNAME})
-		DBROLE=$(db2pd -db ${DBNAME} -hadr | grep HADR_ROLE | awk '{print $3}' | head -1)
+		#DBROLE=$(db2pd -db ${DBNAME} -hadr | grep HADR_ROLE | awk '{print $3}' | head -1)
 		DBHADRSTATE=$(db2pd -db ${DBNAME} -hadr | grep HADR_STATE | awk '{print $3}' | head -1)
 		DBHADRCONNSTATUS=$(db2pd -db ${DBNAME} -hadr | grep HADR_CONNECT_STATUS  | awk '{print $3}' | head -1)
 		DBPRIMLOG=$(db2pd -db ${DBNAME} -hadr | grep PRIMARY_LOG_FILE | awk '{print $3 $4 $5}')

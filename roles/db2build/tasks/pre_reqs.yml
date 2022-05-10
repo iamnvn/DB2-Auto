@@ -1,16 +1,6 @@
 ---
 ## pre-req tasks
 
- - name: Create - Directory Structure
-   file: path="{{ item }}" state=directory owner=root group="{{ createinst['instgrp'] }}" mode=0777
-   loop: "{{ dirstocreate }}"
-   tags: createdirs
-
- - name: Create - DB2 Related Directories.
-   file: path="{{ item }}" state=directory owner=root group="{{ createinst['instgrp'] }}" mode=0775
-   loop: "{{ db2dirs }}"
-   tags: createdirs
-
  - set_fact:
       inst: "{{ createinst['instid'] }}"
       fenc: "{{ createinst['fencid'] }}"
@@ -36,6 +26,16 @@
      - "{{ inst }}"
      - "{{ fenc }}"
    tags: useradd
+
+ - name: Create - Directory Structure
+   file: path="{{ item }}" state=directory owner=root group="{{ createinst['instgrp'] }}" mode=0777
+   loop: "{{ dirstocreate }}"
+   tags: createdirs
+
+ - name: Create - DB2 Related Directories.
+   file: path="{{ item }}" state=directory owner=root group="{{ createinst['instgrp'] }}" mode=0775
+   loop: "{{ db2dirs }}"
+   tags: createdirs
 
  - name: Create - DB2 Instance Home Directory.
    file: path="/db/home" state=directory owner="{{ createinst['instid'] }}" group="{{ createinst['instgrp'] }}" mode=0755

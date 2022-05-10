@@ -10,6 +10,7 @@ db2vpath: /opt/IBM/db2/11.1
 installtsamp: true
 licfile: db2ese.lic
 copybinaries: true
+db2install: yes
 
 ## Crate instance vars.
 createinst:

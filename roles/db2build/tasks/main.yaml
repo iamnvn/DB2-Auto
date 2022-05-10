@@ -14,51 +14,61 @@
     #- debug: msg="{{ inst }}"
     # tags: always
 
-    - name: Run - DB2 Install (NOTSAMP)
-      shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -f NOTSAMP -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
-      register: db2install_check
-      async: 3600
-      poll: 0
-      when: not installtsamp
+    - name: Block for db2 installation
+      block:
+        - name: Run - DB2 Install (Without TSAMP)
+          shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -f NOTSAMP -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
+          register: db2install_check
+          async: 3600
+          poll: 0
+          when: not installtsamp
+
+        - name: Run - DB2 Install (With TSAMP)
+          shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
+          register: db2install_check
+          async: 3600
+          poll: 0
+          when: installtsamp | bool
+
+        - name: Monitor db2 installation job
+          async_status:
+            jid: "{{ db2install_check.ansible_job_id }}"
+          register: db2install_RESULT
+          until: db2install_RESULT.finished
+          retries: 60
+          delay: 40
+      when: db2install | bool
       tags: install
 
-    - name: Run - DB2 Install
-      shell: "{{ binariesdir }}/{{ swtype }}/db2_install -b {{ db2vpath }} -p SERVER -l {{ logdir }}/install_db2.log -n -y >> {{ logdir }}/install_STDERR.log 2>&1"
-      register: db2install_check
-      async: 3600
-      poll: 0
-      when: installtsamp | bool
-      tags: install
+      rescue:
+        - name: ERROR - DB2 Installation failed.
+          fail: msg="Check - {{ logdir }}/install_db2.log for details"
+          tag: install
 
-    - name: Monitor db2 installation job
-      async_status:
-        jid: "{{ db2install_check.ansible_job_id }}"
-      register: db2install_RESULT
-      until: db2install_RESULT.finished
-      retries: 60
-      delay: 40
-      tags: install
+    - name: Block for create Db2 Instance
+      block:
+        - name: Create - DB2 Instance
+          shell: "{{ db2vpath }}/instance/db2icrt -u {{ fenc }} {{ inst }} > {{ logdir }}/{{ inst }}_db2icrt.log 2>&1"
+          register: icrt_result
+          async: 3600
+          poll: 0
 
-    - name: Create - DB2 Instance
-      shell: "{{ db2vpath }}/instance/db2icrt -u {{ fenc }} {{ inst }} > {{ logdir }}/{{ inst }}_db2icrt.log 2>&1"
-      register: icrt_result 
+        - name: Monitor db2 instance create job
+          become: true
+          become_method: sudo
+          async_status:
+            jid: "{{ icrt_result.ansible_job_id }}"
+          register:  db2icrt_result
+          until: db2icrt_result.finished
+          retries: 60
+          delay: 30
       when: createinst['create'] | bool
-      become: true
-      become_method: sudo
-      async: 3600
-      poll: 0   
       tags: createinst
 
-    - name: Monitor db2 instance create job
-      become: true
-      become_method: sudo
-      async_status:
-        jid: "{{ icrt_result.ansible_job_id }}"
-      register:  db2icrt_result
-      until: db2icrt_result.finished
-      retries: 60
-      delay: 30
-      when: createinst['create'] | bool    
+      rescue:
+        - name: ERROR - DB2 Instance Creation failed.
+          fail: msg="Check - {{ logdir }}/{{ inst }}_db2icrt.log for details"
+          tag: install
 
     - name: Block to Run as Instace user
       block:
@@ -83,7 +93,9 @@
           tags: createinst
 
         - name: Create - db2 database
-          script: "create_db.sh {{ createdb['name'] }} {{ createdb['datadir'] }} {{ createdb['dbdir'] }} {{ inst }}"
+          shell: |
+                  . $HOME/sqllib/db2profile
+                  "db2 -v CREATE DATABASE {{ createdb['name'] }} ON {{ createdb['datadir'] }} DBPATH ON {{ createdb['dbdir'] }} RESTRICTIVE"
           when: createdb['create'] | bool
           tags: createdb
 

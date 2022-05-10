@@ -11,6 +11,23 @@
    loop: "{{ db2dirs }}"
    tags: createdirs
 
+ - name: Create - Group
+   groupadd:
+        name: dba
+        state: present
+        gid: 0507
+   tags: groupadd
+
+ - name: Create Instance and Fenced Users
+   useradd:
+      name: "{{ item }}"
+      home: "/db/home/{{ item }}"
+      password: abcd1234
+      shell: /bin/bash
+      uid: 1040
+      group: dba
+   tags: useradd
+
  - name: Create - DB2 Instance Home Directory.
    file: path="/db/home" state=directory owner="{{ createinst['instid'] }}" group="{{ createinst['instgrp'] }}" mode=0755
    tags: createdirs
@@ -42,7 +59,7 @@
    when: copybinaries | bool
    tags: copybinaries 
 
- - name: Copy - DB2 Standard Scrips
-   copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
-   loop: "{{ scriptstocopy }}"
-   tags: copyscripts
+ #- name: Copy - DB2 Standard Scrips
+ #  copy: src="{{ item }}" dest="{{ scriptsdir }}/{{ item }}" mode=0755
+ #  loop: "{{ scriptstocopy }}"
+ #  tags: copyscripts

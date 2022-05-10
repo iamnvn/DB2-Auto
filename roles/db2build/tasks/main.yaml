@@ -40,7 +40,7 @@
       when: db2install | bool
       tags: install
 
-    - rescue:
+      rescue:
       - name: ERROR - DB2 Installation failed.
         fail: msg="Check - {{ logdir }}/install_db2.log for details"
         tag: install
@@ -65,7 +65,7 @@
       when: createinst['create'] | bool
       tags: createinst
 
-    - rescue:
+      rescue:
       - name: ERROR - DB2 Instance Creation failed.
         fail: msg="Check - {{ logdir }}/{{ inst }}_db2icrt.log for details"
         tag: install
@@ -107,5 +107,5 @@
       become_user: "{{ inst }}"
 
       rescue:
-        - name: ERROR
+        - name: ERROR - DB2 Instance related steps failed.
           fail: "{{ inst }} Commands failed. Please Check"

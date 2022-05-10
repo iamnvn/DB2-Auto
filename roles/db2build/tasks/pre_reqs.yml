@@ -32,7 +32,9 @@
     shell: /bin/bash
     uid: 1040
     group: dba
-  loop: ['{{ inst }}','{{ fenc }}']
+  loop: 
+    - "{{ inst }}"
+    - "{{ fenc }}"
    tags: useradd
 
  - name: Create - DB2 Instance Home Directory.

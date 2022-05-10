@@ -11,21 +11,28 @@
    loop: "{{ db2dirs }}"
    tags: createdirs
 
+ - set_fact:
+      inst: "{{ createinst['instid'] }}"
+      fenc: "{{ createinst['fencid'] }}"
+      instgrp: "{{ createinst['instgrp'] }}"
+   tags: always
+
  - name: Create - Group
-   groupadd:
-        name: dba
-        state: present
-        gid: 0507
+   group:
+    name: "{{ instgrp }}"
+    state: present
+    gid: 0507
    tags: groupadd
 
  - name: Create Instance and Fenced Users
-   useradd:
-      name: "{{ item }}"
-      home: "/db/home/{{ item }}"
-      password: abcd1234
-      shell: /bin/bash
-      uid: 1040
-      group: dba
+   user:
+    name: "{{ item }}"
+    home: "/db/home/{{ item }}"
+    password: abcd1234
+    shell: /bin/bash
+    uid: 1040
+    group: dba
+  loop: ['{{ inst }}','{{ fenc }}']
    tags: useradd
 
  - name: Create - DB2 Instance Home Directory.

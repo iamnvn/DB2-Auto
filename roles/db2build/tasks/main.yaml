@@ -6,10 +6,10 @@
       import_tasks: pre_reqs.yml
       tags: prereq
 
-    - set_fact:
-         inst: "{{ createinst['instid'] }}"
-         fenc: "{{ createinst['fencid'] }}"
-      tags: always
+    #- set_fact:
+    #     inst: "{{ createinst['instid'] }}"
+    #     fenc: "{{ createinst['fencid'] }}"
+    #  tags: always
 
     #- debug: msg="{{ inst }}"
     # tags: always

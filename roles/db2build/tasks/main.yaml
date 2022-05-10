@@ -38,12 +38,11 @@
           retries: 60
           delay: 40
       when: db2install | bool
-      tags: install
-
+      
       rescue:
         - name: ERROR - DB2 Installation failed.
           fail: msg="Check - {{ logdir }}/install_db2.log for details"
-          tag: install
+      tags: install
 
     - name: Block for create Db2 Instance
       block:
@@ -63,12 +62,11 @@
           retries: 60
           delay: 30
       when: createinst['create'] | bool
-      tags: createinst
-
+      
       rescue:
         - name: ERROR - DB2 Instance Creation failed.
           fail: msg="Check - {{ logdir }}/{{ inst }}_db2icrt.log for details"
-          tag: install
+      tags: createinstance
 
     - name: Block to Run as Instace user
       block:

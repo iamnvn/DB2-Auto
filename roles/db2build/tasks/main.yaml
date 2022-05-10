@@ -41,9 +41,9 @@
       tags: install
 
       rescue:
-      - name: ERROR - DB2 Installation failed.
-        fail: msg="Check - {{ logdir }}/install_db2.log for details"
-        tag: install
+        - name: ERROR - DB2 Installation failed.
+          fail: msg="Check - {{ logdir }}/install_db2.log for details"
+          tag: install
 
     - name: Block for create Db2 Instance
       block:
@@ -66,9 +66,9 @@
       tags: createinst
 
       rescue:
-      - name: ERROR - DB2 Instance Creation failed.
-        fail: msg="Check - {{ logdir }}/{{ inst }}_db2icrt.log for details"
-        tag: install
+        - name: ERROR - DB2 Instance Creation failed.
+          fail: msg="Check - {{ logdir }}/{{ inst }}_db2icrt.log for details"
+          tag: install
 
     - name: Block to Run as Instace user
       block:

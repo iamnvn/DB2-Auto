@@ -20,7 +20,7 @@
     home: "/db/home/{{ item }}"
     password: abcd1234
     shell: /bin/bash
-    uid: 1040
+    #uid: 1040
     group: dba
    loop: 
      - "{{ inst }}"

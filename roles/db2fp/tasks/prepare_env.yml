@@ -19,6 +19,10 @@
               if [[ -f /tmp/validation.txt ]]; then sudo rm -f /tmp/validation.txt; fi
               if [[ -f /tmp/HADR_roles.txt ]]; then sudo rm -f /tmp/HADR_roles.txt; fi
               if [[ -f /tmp/cur_db_role.txt ]]; then sudo rm -f /tmp/cur_db_role.txt; fi
+              if [[ -f /tmp/inst.final ]]; then sudo rm -f /tmp/inst.final; fi
+              if [[ -f /tmp/notvalidinst.lst ]]; then sudo rm -f /tmp/notvalidinst.lst; fi
+              #echo "Instance    cur_db2level    req_db2level      Valid_inst_for_fp_upgrade?" >> /tmp/validation.txt
+              #echo "-------------------------------------------------------------------------" >> /tmp/validation.txt
               LOGDIR="{{ logsdir }}"
               echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh
               . /tmp/include_db2
@@ -28,12 +32,8 @@
       tags: always
 
     - set_fact:
-        db2ilist: "{{ db2inlst }}"
+        db2ilistall: "{{ db2inlst }}"
       tags: always
-
-    - name: "Info - DB2 Fixpack Version \"DB2 {{ tgtversion }}\" will be performed on \"{{ tgtdb2inst }}\" Db2 Instance(s)"
-      debug: msg="{{ db2ilist.stdout_lines }}"
-      tags: listinst,info
 
     - name: Check - Validate server and user input
       import_tasks: "validate_inputs.yml"

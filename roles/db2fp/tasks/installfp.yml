@@ -24,7 +24,7 @@
 
           if [[ ${DOMAIN} -gt 0 ]]; then
             chrsrc -c IBM.PeerNode CritRsrcProtMethod=3
-            /usr/bin/startrpdomain -f ${DOMAINNAME} > {{ logsdir }}/startrpdomain.log
+            /usr/bin/startrpdomain ${DOMAINNAME} > {{ logsdir }}/startrpdomain.log
             RC=$?
             if [[ ${RC} -ne 0 ]];then
               echo "Not able to start domain - ${DOMAINNAME} - Please check" | tee -a {{ logsdir }}/startrpdomain.log

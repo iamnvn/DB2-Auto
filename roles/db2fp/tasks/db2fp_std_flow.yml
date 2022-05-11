@@ -14,10 +14,6 @@
     when: installupdate == "update" or installupdate == "install_update"
     tags: update
 
-  - import_tasks: tsamp_upgrade.yml
-    when: installupdate == "update" or installupdate == "install_update"
-    tags: update
-
   - import_tasks: startdb2.yml
     when: installupdate == "update" or installupdate == "install_update"
     tags: startdb2
@@ -25,3 +21,7 @@
   - import_tasks: postpatch.yml
     when: installupdate == "update" or installupdate == "install_update"
     tags: postpatch
+
+  - import_tasks: tsamp_upgrade.yml
+    when: installupdate == "update" or installupdate == "install_update"
+    tags: update

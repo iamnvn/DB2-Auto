@@ -2,11 +2,11 @@
 # vars file for db2_build
 target_server: all
 tgtdir: /db/db2_build
-swsrchost: 192.168.1.105
+swsrchost: 172.20.10.4
 swlocaldir: /root/DB2Binaries
-swtocopy: v11.1.1fp1_linuxx64_universal_fixpack.tar.gz
+swtocopy: v11.5.6_linuxx64_universal_fixpack.tar.gz
 swtype: universal
-db2vpath: /opt/IBM/db2/11.1
+db2vpath: /opt/IBM/db2/11.5
 installtsamp: true
 licfile: db2ese.lic
 copybinaries: true

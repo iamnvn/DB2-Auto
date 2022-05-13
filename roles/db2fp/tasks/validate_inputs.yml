@@ -13,7 +13,7 @@
               BACKUPSDIR="{{ bkpsdir }}"
               if [[ -f ${BACKUPSDIR}/vip_validation_final.txt ]]; then sudo rm -f ${BACKUPSDIR}/vip_validation_final.txt; fi
               if [[ -f $LOGDIR/after_validaton.txt ]]; then sudo rm -f $LOGDIR/after_validaton.txt; fi
-              if [[ -d ${LOGDIR} ]]; then mkdir -m 777 -p ${LOGDIR}; fi
+              if [[ ! -d ${LOGDIR} ]]; then mkdir -m 777 -p ${LOGDIR}; fi
               . /tmp/include_db2
               log_roll ${MAINLOG}
               echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh

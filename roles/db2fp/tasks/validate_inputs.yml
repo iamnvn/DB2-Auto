@@ -13,7 +13,7 @@
               BACKUPSDIR="{{ bkpsdir }}"
               if [[ -f ${BACKUPSDIR}/vip_validation_final.txt ]]; then sudo rm -f ${BACKUPSDIR}/vip_validation_final.txt; fi
               if [[ -f $LOGDIR/after_validaton.txt ]]; then sudo rm -f $LOGDIR/after_validaton.txt; fi
-              echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh
+              #echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh
               . /tmp/include_db2
               log_roll ${MAINLOG}
       tags: cleanup

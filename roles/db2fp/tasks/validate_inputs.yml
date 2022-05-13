@@ -16,6 +16,8 @@
               #echo "find $LOGDIR/* -name \"*.log*\" -type f -mtime +30 -exec rm -f {} \\;" | sh
               . /tmp/include_db2
               log_roll ${MAINLOG}
+      become: true
+      become_method: sudo
       tags: cleanup
 
     - name: Get - All db2 instances from Server

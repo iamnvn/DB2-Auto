@@ -117,6 +117,7 @@ function db_hadr {
 			DBSTDBYHOST2=""
 			DBSTDBYHOST3=""
 		  fi
+    fi
   }
 
 function tsacluster {

@@ -54,7 +54,7 @@
       become: true
       become_user: "{{ item }}"
       loop: "{{ db2ilistall.stdout_lines }}"
-      failed_when: cmdout.rc > 1
+      failed_when: instfinal.rc > 1
       tags: always
 
     - block:

@@ -5,7 +5,7 @@
               VALLOG="{{ logsdir }}/after_validaton.txt"
               echo "==========================" >> ${VALLOG}
               echo "Instance - {{ item }}" >> ${VALLOG}
-              echo "--------------------------" >> ${VALLOG}
+              echo "==========================" >> ${VALLOG}
               echo "      db2level            " >> ${VALLOG}
               echo "--------------------------" >> ${VALLOG}
               db2level | tail -4 | head -3>> ${VALLOG}

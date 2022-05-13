@@ -164,15 +164,41 @@ function get_inst_home {
     fi
 }
 
-function upgradedb {
-        if [[ "$(cat db2-role.txt)" == "PRIMARY" || "$(cat db2-role.txt)" == "STANDARD" ]]; then
-		    db2 -v deactivate db ${DBNAME} > ${LOGDIR}/db2upgradedb_${DBNAME}.log
-		    db2 -v UPGRADE DATABASE ${DBNAME} REBINDALL >> ${LOGDIR}/db2upgradedb_${DBNAME}.log 2>&1
-		    RCD=$?
-	    else
-		    db2 -v deactivate db ${DBNAME} > ${LOGDIR}/db2upgradedb_${DBNAME}.log
-		    db2 -v UPGRADE DATABASE ${DBNAME} >> ${LOGDIR}/db2upgradedb_${DBNAME}.log 2>&1
-		    RCD=$?
-	    fi
-}
+function db2updv_binds {
+
+  DB2VR=$(db2level | grep -i "Informational tokens" | awk '{print $5}')
+  if [[ "${DB2VR:0:5}" == "v11.1" ]]; then
+    DB2UPDB=db2updv111
+  elif [[ "${DB2VR:0:5}" == "v11.5" ]]; then
+    DB2UPDB=db2updv115
+  else
+    DB2UPDB=db2updv10
+  fi
+      
+    while read DBNAME
+    do
+      DBROLE=$(db2 get db cfg for ${DBNAME} | grep -i "HADR database role" | cut -d "=" -f2 | awk '{print $1}')
+      if [[ "${DBROLE}" == "PRIMARY" || "${DBROLE}" == "STANDARD" ]]; then
+        log "Running - ${DB2UPDB} -d ${DBNAME}"
+          ${DB2UPDB} -d ${DBNAME} > ${LOGDIR}/db2updv_${DBNAME}.log 2>&1
+          RCD=$?
+          db2 terminate
+          if [[ ${RCD} -eq 0 ]]; then
+            log "${DBNAME} - Upgraded"
+          else
+            log "${DBNAME} - Upgrade FAILED"
+            exit 23
+          fi          
+        log "Running - binds on ${DBNAME}"
+          db2 -ec +o connect to ${DBNAME}
+          db2 BIND ${INSTHOME}/sqllib/bnd/db2schema.bnd BLOCKING ALL GRANT PUBLIC SQLERROR CONTINUE > ${BACKUPSDIR}/BIND_${DBNAME}.log
+          db2 BIND ${INSTHOME}/sqllib/bnd/@db2ubind.lst BLOCKING ALL GRANT PUBLIC ACTION ADD >> ${BACKUPSDIR}/BIND_${DBNAME}.log
+          db2 BIND ${INSTHOME}/sqllib/bnd/@db2cli.lst BLOCKING ALL GRANT PUBLIC ACTION ADD >> ${BACKUPSDIR}/BIND_${DBNAME}.log
+          db2 terminate
+          db2rbind ${DBNAME} -l ${BACKUPSDIR}/db2rbind_${DBNAME}.log all > /dev/null
+      else
+        log "Standby Database skipping binds and upgradedb"
+      fi
+    done < /tmp/${DB2INST}.db.lst
+  }
 #cd ${SCRIPTSDIR}

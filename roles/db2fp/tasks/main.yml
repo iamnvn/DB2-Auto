@@ -1,5 +1,4 @@
 ---
-
     - debug: msg="Play_hosts={{play_hosts}}"
       run_once: true
       tags: always
@@ -19,6 +18,18 @@
     - include_vars: db2v10511.yml
       when: tgtversion == "v10.5.11"
       tags: always
+
+    - name: Copy - Comman functions and variables file
+      template: src="include_db2.sh" dest="/tmp/include_db2" mode=0777
+      tags: copytemplate
+
+    - name: Check - Validate server and user input
+      import_tasks: "validate_inputs.yml"
+      tags: prereq
+
+    - name: Run - Prereq Steps
+      import_tasks: "pre_reqs.yml"
+      tags: prereq
 
     - name: Prepare - Target Environmet
       import_tasks: prepare_env.yml
@@ -44,26 +55,36 @@
 
       when: DBROLE == "STANDBY" and HADRSTATE == "PEER"
       tags: standbyfp
+      notify: startprimaryupgrade
 
-    - name: Block for DB2 Primary Servers Fixpack Upgrade.
-      block:
-        - debug: msg="DB2 Fixpack upgrade Started for Primary Servers"
-          run_once: true
-        - import_tasks: db2fp_std_flow.yml
-        - import_tasks: failover.yml
-          when: 
-            - installupdate == "update" or installupdate == "install_update"
-            - failback | bool
-          tags: failover
-      when: DBROLE == "PRIMARY"
-      tags: primaryfp
+      handlers:
+        - name: startprimaryupgrade
+        - name: Block for DB2 Primary Servers Fixpack Upgrade.
+          block:
+            - debug: msg="DB2 Fixpack upgrade Started for Primary Servers"
+              run_once: true
+            - import_tasks: db2fp_std_flow.yml
+            - import_tasks: failover.yml
+              when: 
+                - installupdate == "update" or installupdate == "install_update"
+                - failback | bool
+              tags: failover
+          when: DBROLE == "PRIMARY"
+          tags: primaryfp
 
     - name: Mixed DB2 Database Roles
       debug: msg="Found MIXED DB2 Database Roles Please Make all Databases Primary/Standby/Standard"
       when: DBROLE == "MIXED"
 
-    - import_tasks: validate_db2.yml
-      tags: validate
+    - import_tasks: tsamp_upgrade.yml
+      when: DBROLE == "PRIMARY" or DBROLE == "STANDBY"
+      tags: tsmpupgrade
+
+    - import_tasks: db2level_licm.yml
+      tags: db2levelafter
+
+    #- import_tasks: validate_db2.yml
+    #  tags: validate
 
     - import_tasks: cleanup.yml
       tags: cleanup

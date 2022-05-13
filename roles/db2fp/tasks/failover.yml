@@ -4,4 +4,14 @@
       become: true
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
-      tags: failoverdb2
+      tags: failover
+
+    - command: "cat {{ bkpsdir }}/vip_validation_final.txt"
+      register: vipout
+      failed_when: vipout.rc > 1
+      tags: failover
+
+    - name: Validate Databases and VIP after Failover
+      debug: msg="{{ vipout.stdout_lines }}"
+      when: vipout.stdout != ''
+      tags: failover

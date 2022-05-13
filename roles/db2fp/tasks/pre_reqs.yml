@@ -8,14 +8,13 @@
   become_method: sudo
   tags: createdirs
 
-- name: Copy - DB2 Binaries
-  synchronize: src="{{ swlocaldir }}/{{ db2sw }}" dest="{{ binariesdir }}" mode=push
-  delegate_to: "{{ centralhost }}"
-  when: copybinaries | bool
-  tags: copybinaries
+- block:
+    - name: Copy - DB2 Binaries
+      synchronize: src="{{ swlocaldir }}/{{ db2sw }}" dest="{{ binariesdir }}" mode=push
+      delegate_to: "{{ centralhost }}"
 
-- name: Unzip - DB2 Binaries
-  unarchive: src="{{ binariesdir }}/{{ db2sw }}" dest="{{ binariesdir }}" remote_src=yes
+    - name: Unzip - DB2 Binaries
+      unarchive: src="{{ binariesdir }}/{{ db2sw }}" dest="{{ binariesdir }}" remote_src=yes
   when: copybinaries | bool
   tags: copybinaries
 

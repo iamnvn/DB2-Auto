@@ -51,25 +51,24 @@
         - import_tasks: db2fp_std_flow.yml
         - import_tasks: failover.yml
           when: installupdate == "update" or installupdate == "install_update"
-          notify: startprimaryupgrade
+          #notify: startprimaryupgrade
           tags: failover
       when: DBROLE == "STANDBY" and HADRSTATE == "PEER"
       tags: standbyfp
       
-      handlers:
-        - name: startprimaryupgrade
-        #- name: Block for DB2 Primary Servers Fixpack Upgrade.
-          block:
-            - debug: msg="DB2 Fixpack upgrade Started for Primary Servers"
-              run_once: true
-            - import_tasks: db2fp_std_flow.yml
-            - import_tasks: failover.yml
-              when: 
-                - installupdate == "update" or installupdate == "install_update"
-                - failback | bool
-              tags: failover
-          when: DBROLE == "PRIMARY"
-          tags: primaryfp
+
+    - name: Block for DB2 Primary Servers Fixpack Upgrade.
+      block:
+          - debug: msg="DB2 Fixpack upgrade Started for Primary Servers"
+            run_once: true
+          - import_tasks: db2fp_std_flow.yml
+          - import_tasks: failover.yml
+            when: 
+              - installupdate == "update" or installupdate == "install_update"
+              - failback | bool
+            tags: failover
+      when: DBROLE == "PRIMARY"
+      tags: primaryfp
 
     - name: Mixed DB2 Database Roles
       debug: msg="Found MIXED DB2 Database Roles Please Make all Databases Primary/Standby/Standard"

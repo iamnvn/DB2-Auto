@@ -82,10 +82,12 @@
 
     - command: cat /tmp/notvalidinst.lst
       register: notvalidinst
+      failed_when: notvalidinst.rc > 1
       tags: always
 
     - command: cat /tmp/inst.final
       register: instfinal
+      failed_when: instfinal.rc > 1
       tags: always
 
     - set_fact:

@@ -51,12 +51,11 @@
         - import_tasks: db2fp_std_flow.yml
         - import_tasks: failover.yml
           when: installupdate == "update" or installupdate == "install_update"
+          notify: startprimaryupgrade
           tags: failover
-
       when: DBROLE == "STANDBY" and HADRSTATE == "PEER"
       tags: standbyfp
-      notify: startprimaryupgrade
-
+      
       handlers:
         - name: startprimaryupgrade
         #- name: Block for DB2 Primary Servers Fixpack Upgrade.

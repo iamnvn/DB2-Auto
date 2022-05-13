@@ -1,64 +1,42 @@
 db2 fix pack upgrade:
 ====================
-  - This playbook will install db2 with latest patch and update db2 instance and database.
-  - This playbook able to handle Stand-Alone, HADR 2,3 or 4 node upgrades.
 
-Requirements:
-------------
-  - We must prepared with inventory file as shown in examples.
-  - We must have root/sudo access to install fix pack and update db2 instance.
-  - Declare Variables to match with our Environment.
- Inventory Examples:
-    [db2hadr]
-    172.20.10.2 ansible_user=root
-    172.20.10.4 ansible_user=root
+Tasks: 
 
-            (OR)
+1. Get vars file based on db2 version - db2v1**.yml
 
-    [fptest]
-    dvltestdb1
-    dvltestdb2
-    dvltestdb3
+2. Copy - Comman functions and variables file.
 
-    [fptest:vars]
-    ansible_user = root
+3. Check - Validate server and user input
+    i.    Get - all db2 instances from Server.
+    ii.   Checking - Current db2level and Requested db2level for each instance.
+    iii.  Checking - New Installation Directory Empty or not. It FAILS if Dir not empty.
+    iv.   Info - DB2 Fixpack will be performed on below Db2 Instance(s). (New valid list of instances will proceed with upgrade)
+    v.    WARNING - DB2 FP Upgrade Skipping for below Instance(s) resubmit job with correct level. (In case of current level and requested level has mismatch)
 
-Play Variables:
---------------
-  - Change Variables to match our Environment in vars/vars_db2.yaml
-    Example:
-    # vars file for db2 Fixpack upgrade
-    target_server: fptest                               ## Target hosts group which mentioned in ansible inventory file.
-    tgtdir: /home/db2inst1/maint                        ## Target machines director to copy binaries scripts etc.
-    swlocaldir: /root/projects                          ## DB2 Software location in local(controllar) server.
-    swtocopy: v11.1.4fp6_linuxx64_client.tar.gz         ## DB2 Software to copy and install on target servers.
-    swtype: client                                      ## After extract .tar file which directory will create. Ex: universal / server_t.
-    db2product: client                                  ## Which software product going to install client / server.
-    pversion: APR-2022                                  ## Patch version. User defined can give any name.
+4. Run - Prereq Steps
+    i.    Create - Directory Structure.
+    ii.   Copy - DB2 Binaries and Unzip - DB2 Binaries.
+    iii.  Copy - Scripts used for fp upgrade.
 
+5. Prepare - Target Environmet
+    i.    Run - Check Current db2 database Roles.
+    ii.   Get - Current Server Role. (Here we will decide what server it was like STANDBY/PRIMARY/STANDARD)
+    iii.  Info - Server Status.
 
-Examples for run Playbook:
--------------------------
-ansible-playbook db2_fpupgrade.yaml
-ansible-playbook db2_fpupgrade.yaml -i inventory --tags prereq
-ansible-playbook db2_fpupgrade.yaml -i inventory --skip-tags copybinaries
+6. Block for DB2 StandAlone Servers Fixpack Upgrade.
+    i.    Pre-Patch   ==> This will take backups before upgrade.
+    ii.   Stop-db2    ==> Force apps --> Deactivatedb --> db2haicu -disable --> db2stop --> ipclean -a.
+    iii.  Patch-db2   ==> Install db2 fixpack (stoprpdomain --> installfp --> startrpdomain if there is online domain).
+    iv.   db2iupdt    ==> Instance update.
+    v.    Start-db2   ==> Start Inc --> Activatedbs --> db2updv --> binds(for standard/primary) --> db2haicu -enable(for cluster).
+    vi.   Post-Patch  ==> This will take backups after upgrade.
 
-  All available tags:
-      createdirs - Just to create target directories.
-      copytemplate - To copy commonly used functions and variables.
-      copybinaries - To copy binaries and unarchive them.
-      copyscripts - To copy scripts to target.
-      prereq - This will do basic setup(all tags mentioned above in one) to target.
-      hadr_roles,todolist - To run hadr_roles.sh and todolist.sh
-      todos - This will display steps to run on each node, just display no run.
-      main - This will run all steps in target nodes.
+7. Block for DB2 Standby Servers Fixpack Upgrade
+    i.   Repeats step 6
+    ii.  Run Takeover (failover.yml)
+    iii. Validate VIP and Current db2 level and db2licm on server.
+    iv.  It will notify Primary server to start its upgrade.
 
-Dependencies
-------------
-  - When there is db2patch.running file in tgtdir/pversion directory playbook will only run main steps.
-  - When there is db2patch.complete file in tgtdir/pversion directory playbook will not run anything.
-
-Author Information
-------------------
-  # Date: Apr 17, 2022
-  # Written by: Naveen Chintada
+8. 
+    

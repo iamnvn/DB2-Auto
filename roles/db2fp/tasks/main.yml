@@ -59,7 +59,7 @@
 
       handlers:
         - name: startprimaryupgrade
-        - name: Block for DB2 Primary Servers Fixpack Upgrade.
+        #- name: Block for DB2 Primary Servers Fixpack Upgrade.
           block:
             - debug: msg="DB2 Fixpack upgrade Started for Primary Servers"
               run_once: true

@@ -22,6 +22,6 @@
     when: installupdate == "update" or installupdate == "install_update"
     tags: postpatch
 
-  - import_tasks: tsamp_upgrade.yml
-    when: installupdate == "update" or installupdate == "install_update"
-    tags: update
+  #- import_tasks: tsamp_upgrade.yml
+  #  when: installupdate == "update" or installupdate == "install_update"
+  #  tags: update

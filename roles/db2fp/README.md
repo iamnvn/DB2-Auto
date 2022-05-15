@@ -31,6 +31,7 @@ Tasks:
     iv.   db2iupdt    ==> Instance update.
     v.    Start-db2   ==> Start Inc --> Activatedbs --> db2updv --> binds(for standard/primary) --> db2haicu -enable(for cluster).
     vi.   Post-Patch  ==> This will take backups after upgrade.
+    vii.  Validate Current db2 level and db2licm on server.
 
 7. Block for DB2 Standby Servers Fixpack Upgrade
     i.   Repeats step 6
@@ -38,5 +39,20 @@ Tasks:
     iii. Validate VIP and Current db2 level and db2licm on server.
     iv.  It will notify Primary server to start its upgrade.
 
-8. 
+8. Block for DB2 Primary Servers Fixpack Upgrade.
+    i.   Repeats step 6
+    ii.  Run Takeover (failover.yml)
+    iii. Validate VIP and Current db2 level and db2licm on server.
+    iv.  It will notify Primary server to start its upgrade.
+
+9. Mixed Database Roles(STANDBY & PRIMARY on same node)
+    i.  It will just display message about mixed modes.
+    ii. Validate Current db2 level and db2licm on server.
     
+10. TSAMP Upgrade if required 
+    i. Check and Upgrade TSAMP - If required
+    ii. Verify if TSAMP still has Mixed Version and Display TSAMP Information.
+
+11. Cleanup
+    i. Remove scripts
+    ii. Remove temp files

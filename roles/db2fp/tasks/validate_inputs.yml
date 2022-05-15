@@ -96,9 +96,15 @@
 
     - name: "Info - DB2 Fixpack \"DB2 {{ tgtversion }}\" will be performed on below Db2 Instance(s)"
       debug: msg="{{ db2ilist.stdout_lines }}"
+      when: db2ilist.stdout != ''
       tags: listinst,info,always
 
     - name: "WARNING - DB2 FP Upgrade Skipping for below Instance(s) resubmit job with correct level"
       debug: msg="{{ notvalidinst.stdout_lines }}"
       when: notvalidinst.stdout != ''
       tags: always
+
+    - name: "ERROR - None of the instances valid for this DB2 Fixpack \"DB2 {{ tgtversion }}\" upgrade"
+      fail: msg="{{ db2ilist.stdout_lines }}"
+      when: db2ilist.stdout == ''
+      tags: listinst,info,always

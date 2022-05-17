@@ -2,9 +2,15 @@
 - name: Running - iUpdate
   shell: |
           export LD_LIBRARY_PATH=
-          {{ db2vpath }}/instance/db2iupdt {{ item }} > {{ logsdir }}/{{ item }}_db2iupdate.log 2>&1
+          {{ db2vpath }}/instance/db2iupdt -u db2udf {{ item }} > {{ logsdir }}/{{ item }}_db2iupdate.log 2>&1
           chmod -f 777 {{ logsdir }}/{{ item }}_db2iupdate.log
+  register: updatecmd
   become: true
   become_method: sudo
   loop: "{{ db2ilist.stdout_lines }}"
+  tags: update
+
+- name: ERROR - DB2 iUpdate Task Failed
+  fail: msg="DB2 iUpdate Task Failed, please check logs"
+  when: updatecmd.rc > 0
   tags: update

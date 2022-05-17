@@ -1,6 +1,7 @@
 ---
     - name: Running - DB2 Failover and Running Binds on Database
       command: "{{ scriptsdir }}/failover.sh {{ item }}"
+      register: failovercmd
       become: true
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
@@ -14,4 +15,9 @@
     - name: Validate Databases and VIP after Failover
       debug: msg="{{ vipout.stdout_lines }}"
       when: vipout.stdout != ''
+      tags: failover
+
+    - name: ERROR - DB2 Failover and Running Binds on Database
+      fail: msg="DB2 Failover and Running Binds on Database - Failed please check logs"
+      when: failovercmd.rc > 0
       tags: failover

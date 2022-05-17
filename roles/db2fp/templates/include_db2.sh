@@ -43,7 +43,7 @@ function log_roll {
     else
       touch ${LOGFNAME}; chmod -f 777 ${LOGFNAME}
     fi
-    find ${LOGDIR}/* -name "${LOGFNAME}*" -type f -mtime +30 -exec rm -f {} \;
+    #find ${LOGDIR}/* -name "${LOGFNAME}*" -type f -mtime +30 -exec rm -f {} \;
 }
 
 function list_dbs {
@@ -146,6 +146,7 @@ function takeoverdb {
       log "Attempting TAKEOVER HADR on ${DBNAME} in ${HNAME}:${DBINST}"
       db2 -v "TAKEOVER HADR ON DB ${DBNAME}" >> ${LOGFILE}
       RCD=$?
+      sleep 5
       if [[ ${RCD} -eq 0 || ${RCD} -eq 4 ]]; then
         log "TAKEOVER HADR on ${DBNAME} in ${HNAME} Completed successfully"
       else

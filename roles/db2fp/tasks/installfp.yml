@@ -26,6 +26,7 @@
             chrsrc -c IBM.PeerNode CritRsrcProtMethod=3
             /usr/bin/startrpdomain ${DOMAINNAME} > {{ logsdir }}/startrpdomain.log
             RC=$?
+            sleep 10
             if [[ ${RC} -ne 0 ]];then
               echo "Not able to start domain - ${DOMAINNAME} - Please check" | tee -a {{ logsdir }}/startrpdomain.log
               exit 24
@@ -50,4 +51,9 @@
   until: db2install_RESULT.finished
   retries: 60
   delay: 60
+  tags: install
+
+- name: ERROR - Install Fixpack Task Failed
+  fail: msg="DB2 Install Fixpack Task Failed, Please check logs"
+  when: db2install_check.rc > 0
   tags: install

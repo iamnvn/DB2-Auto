@@ -40,10 +40,10 @@ log "START - ${SCRIPTNAME} execution started for Instance - ${DB2INST} at $(date
           log "Backup VIP Information"
           RG4DB=$(lsrg | grep -i ${DBNAME})
           VIPINFO=$(lssam -g ${RG4DB} | grep -i ServiceIP | grep -i online | tail -1)
-          ${DBNAME}_VIP=$(echo ${VIPINFO} | cut -d ":" -f2 | awk -F_ '{print $2"."$3"."$4"."$5}' | sed 's/-rs//g')
+          VIP4DB=$(echo ${VIPINFO} | cut -d ":" -f2 | awk -F_ '{print $2"."$3"."$4"."$5}' | sed 's/-rs//g')
           CURVIPHOST=$(echo ${VIPINFO} | cut -d ":" -f3)
 
-          echo "${DBNAME} - ${DBNAME}_VIP - ${CURVIPHOST}" >> ${BACKUPSDIR}/${DB2INST}_vip_info.before
+          echo "${DBNAME} - ${VIP4DB} - ${CURVIPHOST}" >> ${BACKUPSDIR}/${DB2INST}_vip_info.before
           VIP_STATUS=YES
         done < /tmp/${DB2INST}.db.lst
       else
@@ -52,44 +52,56 @@ log "START - ${SCRIPTNAME} execution started for Instance - ${DB2INST} at $(date
       fi
     fi
 
-  takeoverdb
-  sleep 30
+  log "Checking tsamp status before takeover"
+  TSAMPCHK=$(lssam | egrep -i 'lock|SuspendedPropagated|Pending online|Pending Offline|manual' | wc -l)
+  if [[ ${TSAMPCHK} -gt 0 ]]; then
+    log "TSAMP has some problem, Not in correct state, Please take a look"
+    lssam >> ${LOGFILE}
+    exit 23
+  else
+    takeoverdb
+    sleep 30
+  fi
 
     if [[ "${VIP_STATUS}" == "YES" ]]; then
       log "Checking VIP after takeover"
       while read DBNAME
         do
-          log "Backup VIP Information"
+          log "Backup VIP Information after takeover"
           RG4DB=$(lsrg | grep -i ${DBNAME})
           VIPINFO=$(lssam -g ${RG4DB} | grep -i ServiceIP | grep -i online | tail -1)
-          ${DBNAME}_VIP=$(echo ${VIPINFO} | cut -d ":" -f2 | awk -F_ '{print $2"."$3"."$4"."$5}' | sed 's/-rs//g')
+          VIP4DB=$(echo ${VIPINFO} | cut -d ":" -f2 | awk -F_ '{print $2"."$3"."$4"."$5}' | sed 's/-rs//g')
           CURVIPHOST=$(echo ${VIPINFO} | cut -d ":" -f3)
 
-          echo "${DBNAME} - ${DBNAME}_VIP - ${CURVIPHOST}" >> ${BACKUPSDIR}/${DB2INST}_vip_info.after
-          IPCOUNT=$(ip a | grep -i ${DBNAME}_VIP | wc -l)
+          echo "${DBNAME} - ${VIP4DB} - ${CURVIPHOST}" >> ${BACKUPSDIR}/${DB2INST}_vip_info.after
+          IPCOUNT=$(ip a | grep -i ${VIP4DB} | wc -l)
           if [[ ${IPCOUNT} -gt 0 ]]; then
-            echo "VirtualIp = ${DBNAME}_VIP, Currently attached this node = $(hostname -f)" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "${DBNAME}  - Database/VIP Information" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "------------------------------------" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "VirtualIp = ${VIP4DB}, Currently attached to this node = $(hostname -f)" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
             echo "" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-            echo "${DBNAME} - Status" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-            echo "$(db2pd -db ${DBNAME} -" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-            echo ""
+            echo "db2pd -db ${DBNAME} -" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "$(db2pd -db ${DBNAME} -)" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
           else
-            echo "ERROR - VirtualIp = ${DBNAME}_VIP, NOT ATTACHED to this node = $(hostname -f) Please take a look" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "${DBNAME}  - Database/VIP Information" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "------------------------------------" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "ERROR - VirtualIp = ${VIP4DB}, NOT ATTACHED to this node = $(hostname -f) Please take a look" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
             echo "" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-            echo "${DBNAME} - Status" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-            echo "$(db2pd -db ${DBNAME} -" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-            echo ""
+            echo "db2pd -db ${DBNAME} -" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "$(db2pd -db ${DBNAME} -)" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+            echo "" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
           fi
-      done < /tmp/${DB2INST}.db.lst
+        done < /tmp/${DB2INST}.db.lst
     else
       echo "NO VIPs HERE BEFORE and AFTER" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
       echo "" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-      echo "${DBNAME} - Status" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-      echo "$(db2pd -db ${DBNAME} -" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
-      echo ""
+      echo "db2pd -db ${DBNAME} -" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+      echo "$(db2pd -db ${DBNAME} -)" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
+      echo "" >> ${BACKUPSDIR}/${DB2INST}_vip_val.txt
     fi
-
-    ${BACKUPSDIR}/${DB2INST}_vip_val.txt >> ${BACKUPSDIR}/vip_validation_final.txt
+  
+    cat ${BACKUPSDIR}/${DB2INST}_vip_val.txt >> ${BACKUPSDIR}/vip_validation_final.txt
     chmod -f 777 ${BACKUPSDIR}/vip_validation_final.txt
 
   log "Running DB2UPDV(Upgrade db) and Binds on each Database"

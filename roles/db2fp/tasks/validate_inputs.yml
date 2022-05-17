@@ -21,6 +21,19 @@
       become_method: sudo
       tags: cleanup
 
+    - name: Validate db2 binaries path
+      stat: path="{{ binariesdir }}/{{ swtype }}"
+      register: binpath
+      when: installupdate == "install" or installupdate == "install_update"
+      tags: preval
+
+    - name: "ERROR - db2 binaries not exist here {{ binariesdir }}/{{ swtype }}, Please check"
+      fail: msg="Please check binaries path"
+      when: 
+        - not binpath.stat.exists 
+        - installupdate == "install" or installupdate == "install_update"
+      tags: preval
+
     - name: Get - All db2 instances from Server
       shell: |
               DB2INST="{{ tgtdb2inst }}"
@@ -97,7 +110,7 @@
     - name: "Info - DB2 Fixpack \"DB2 {{ tgtversion }}\" will be performed on below Db2 Instance(s)"
       debug: msg="{{ db2ilist.stdout_lines }}"
       when: db2ilist.stdout != ''
-      tags: listinst,info,always
+      tags: preval
 
     - name: "WARNING - DB2 FP Upgrade Skipping for below Instance(s) resubmit job with correct level"
       debug: msg="{{ notvalidinst.stdout_lines }}"
@@ -107,4 +120,4 @@
     - name: "ERROR - None of the instances valid for this DB2 Fixpack \"DB2 {{ tgtversion }}\" upgrade"
       fail: msg="{{ db2ilistall.stdout_lines }}"
       when: db2ilist.stdout == ''
-      tags: listinst,info,always
+      tags: preval

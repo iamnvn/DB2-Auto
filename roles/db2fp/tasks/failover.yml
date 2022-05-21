@@ -5,6 +5,7 @@
       become: true
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
+      failed_when: failovercmd.rc > 0
       tags: failover
 
     - command: "cat {{ bkpsdir }}/vip_validation_final.txt"
@@ -15,9 +16,4 @@
     - name: Validate Databases and VIP after Failover
       debug: msg="{{ vipout.stdout_lines }}"
       when: vipout.stdout != ''
-      tags: failover
-
-    - name: ERROR - DB2 Failover and Running Binds on Database
-      fail: msg="DB2 Failover and Running Binds on Database - Failed please check logs"
-      when: failovercmd.rc > 0
       tags: failover

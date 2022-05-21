@@ -5,9 +5,5 @@
       become: true
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
-      tags: startdb2
-
-    - name: ERROR - Start db2,upgrade db and binds on Databases Task Failed
-      fail: msg="DB2 Start db2,upgrade db and binds on Databases Task Failed, please check logs"
-      when: startdb2cmd.rc > 0
+      failed_when: startdb2cmd.rc > 1
       tags: startdb2

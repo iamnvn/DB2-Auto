@@ -8,9 +8,5 @@
   become: true
   become_method: sudo
   loop: "{{ db2ilist.stdout_lines }}"
-  tags: update
-
-- name: ERROR - DB2 iUpdate Task Failed
-  fail: msg="DB2 iUpdate Task Failed, please check logs"
-  when: updatecmd.rc > 0
+  failed_when: updatecmd.rc > 0
   tags: update

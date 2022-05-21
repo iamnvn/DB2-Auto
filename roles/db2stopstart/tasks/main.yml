@@ -69,8 +69,8 @@
     - name: Get - HADR Roles
       shell: |
               if [[ $(cat /tmp/db2-role.txt | grep -i primary | wc -l) -gt 0 ]]; then
-                PSTANDBY=$(cat /tmp/db2-role.txt | awk '{print $2}')
-                ROLE=$(cat /tmp/db2-role.txt | awk '{print $1}')
+                PSTANDBY=$(cat /tmp/db2-role.txt | grep -i primary | head -1 | awk '{print $2}')
+                ROLE=$(cat /tmp/db2-role.txt |  grep -i primary | head -1 | awk '{print $1}')
                 STANDBYHOST=$(nslookup ${PSTANDBY} | grep -i name | cut -d ":" -f2 | awk '{print $1}')
 
                 echo "${ROLE} ${STANDBYHOST}" > /tmp/cur_db_role.txt

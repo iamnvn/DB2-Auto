@@ -28,15 +28,15 @@ function main {
 }
 
 function get_vars {
-    DBNAME=$1
-    REPORTDAYS=$2
-    BCAKUPTPE=$(echo $3 | tr A-Z a-z)
-    TGTENV=PURESCALE
+    DBNAME="{{ dbname }}"
+    REPORTDAYS="{{ reportdays }}"
+    TGTENV="{{ tgtenv }}"
+    LOGSDIR="{{ logsdir }}"
     SCRIPTNAME=get-backup_his.sh
     HNAME=$(hostname -s)
     HVERSION=$(uname -s)
     DB2INST=$(whoami)
-    LOGSDIR=/tmp
+    
 
     FINALRPT=${LOGSDIR}/daily_report_${DB2INST}.all
     ERRORSRPT=${LOGSDIR}/temp/daily_report_${DB2INST}.err
@@ -283,7 +283,7 @@ function run_bkp_report {
                         if [[ -s ${INCBKPSRPT} || $(grep -c '${DBNAME}' ${INCBKPSRPT}) -eq 0 ]]; then
                             latest_bkp_info_sql i >> /tmp/${DB2INST}_inc_latestbkp.txt
                         fi
-                        if [[ "${TGTENV}" == "PURESCALE" ]]; then
+                        if [[ "$(echo ${TGTENV} | tr A-Z a-z)" == "purescale" ]]; then
                             latest_bkp_info_sql >> /tmp/${DB2INST}_purescale_latestbkp.txt
                         fi
                     else

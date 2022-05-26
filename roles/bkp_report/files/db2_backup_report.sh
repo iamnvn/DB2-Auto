@@ -30,8 +30,7 @@ function main {
 function get_vars {
     DBNAME=$1
     REPORTDAYS=$2
-    BCAKUPTPE=$(echo $3 | tr A-Z a-z)
-    TGTENV=PURESCALE
+    TGTENV=$3
     SCRIPTNAME=get-backup_his.sh
     HNAME=$(hostname -s)
     HVERSION=$(uname -s)
@@ -368,7 +367,7 @@ function disiplay_report {
 
     echo "-- BEGIN - Standby Report (No Action neeed)" >> ${FINALRPT}
     echo "---------------------------------------------------------------" >> ${FINALRPT}
-    ${STANDBYRPT} >> ${FINALRPT}
+    cat ${STANDBYRPT} >> ${FINALRPT}
     echo "-- END" >> ${FINALRPT}
     echo "" >> ${FINALRPT}
 

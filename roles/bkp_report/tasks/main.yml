@@ -3,6 +3,9 @@
       run_once: true
       tags: always
 
+    - local_action: command= perl -p -i -e 's/\r//g' {{ logsdir }}/{{ scripttorun }}
+      become: false
+
     - name: Get db2 instances
       shell: |
               /usr/local/bin/db2ls |  tail -n +4 | awk '{print $1}' |while read inst; do $inst/instance/db2ilist; done > /tmp/db2ilist.lst
@@ -10,9 +13,12 @@
       register: db2ilist
       tags: always
 
+    - name: "Create - Logs directory - \"{{ logsdir }}\""
+      file: path="{{ logsdir }}" state='directory' mode='0777'
+      tags: always
+
     - name: Copy - Script to target node
       template: src="{{ scripttorun }}" dest="{{ logsdir }}/{{ scripttorun }}" mode=0755
-      ignore_errors: true
       tags: copy
 
     - command: date +'%Y%m%d%H%M%S'
@@ -37,6 +43,7 @@
       shell: |
               FINALRPT="{{ finalreport }}"
               LOGSDIR="{{ logsdir }}"
+              MAILTO="{{ mailto }}"
 
               echo "======================================================================" >> ${FINALRPT}
               echo "         Daily Report Generated on - $(date)                          " >> ${FINALRPT}
@@ -72,27 +79,18 @@
               echo "-- END" >> ${FINALRPT}
               echo "" >> ${FINALRPT}
 
-              echo "-- BEGIN - Ingnoring POC / SAMPLE Databases" >> ${FINALRPT}
+              echo "-- BEGIN - Ingnoring Test Databases" >> ${FINALRPT}
               echo "---------------------------------------------------------------" >> ${FINALRPT}
-              cat ${LOGSDIR}/temp/daily_report_*.ignore} >> ${FINALRPT}
+              cat ${LOGSDIR}/temp/daily_report_*.ignore >> ${FINALRPT}
               echo "-- END" >> ${FINALRPT}
               echo "" >> ${FINALRPT}
-              cat ${FINALRPT}
-      register: finalreport
+              mail -s "Backup Report" ${MAILTO} < ${FINALRPT}
+              #cat ${FINALRPT}
+      ignore_errors: true
       run_once: true
       tags: genreport
 
-    - name: Sending mail
-      mail:
-        subject: DB2 LUW - Daily Backup Report 
-        body: "{{ finalreport.stdout_lines }}"
-        #from: jane@example.net (Jane Jolie)
-        to: "{{ mailto }}"
-        #cc: Charlie Root <root@localhost>
-        attach: "{{ finalreport }}"
-        charset: utf8
-      run_once: true
-      become: false
-      #delegate_to: localhost
-      tags: sendmail
+    - name: Remove - Script from target
+      file: path="{{ logsdir }}/{{ scripttorun }}" state=absent
+      tags: remove
 

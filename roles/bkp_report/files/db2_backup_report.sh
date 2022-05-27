@@ -309,9 +309,10 @@ function run_bkp_report {
 function validate_bkp_report {
     while read DBNAME
     do  
+        DBROLE=$(db2 get db cfg for ${DBNAME} | grep -i "HADR database role" | cut -d "=" -f2 | awk '{print $1}')
         if [[ "${DBNAME}" == "SAMPLE"* || "${DBNAME}" == *"POC"* ]]; then
             sleep 0
-        else
+        elif [[ "${DBROLE}" == "PRIMARY" || "${DBROLE}" == "STANDARD" ]]; then
             if [[ $(cat ${FULLBKPSRPT} | grep -i ${DBNAME} | wc -l) -eq 0 ]]; then
                 SUCCESSTS=$(cat /tmp/${DB2INST}_full_latestbkp.txt | grep -i ${DBNAME} | head -1 | awk '{print $4}')
                 BKPTPE=$(cat /tmp/${DB2INST}_full_latestbkp.txt | grep -i ${DBNAME} | head -1 | awk '{print $2}')
@@ -369,25 +370,25 @@ function disiplay_report {
     echo "-- END" >> ${FINALRPT}
     echo "" >> ${FINALRPT}
 
-    echo "-- BEGIN - No Incremental Backups or Failed Incremental Backups (Take Action)" >> ${FINALRPT}
+    echo "-- BEGIN - No Incremental Backups or Failed Incremental Backups --Take Action" >> ${FINALRPT}
     echo "---------------------------------------------------------------" >> ${FINALRPT}
     cat ${ACTIONSRPT} | grep -i incremental >> ${FINALRPT}
     echo "-- END" >> ${FINALRPT}
     echo "" >> ${FINALRPT}
 
-    echo "-- BEGIN - Standby Report (No Action neeed)" >> ${FINALRPT}
+    echo "-- BEGIN - Standby Report --No Action neeed" >> ${FINALRPT}
     echo "---------------------------------------------------------------" >> ${FINALRPT}
     cat ${STANDBYRPT} >> ${FINALRPT}
     echo "-- END" >> ${FINALRPT}
     echo "" >> ${FINALRPT}
 
-    echo "-- BEGIN - Error, Unable to connect or Instance not running (Take Action)" >> ${FINALRPT}
+    echo "-- BEGIN - Error, Unable to connect or Instance not running --Take Action" >> ${FINALRPT}
     echo "-------------------------------------------------------------------------" >> ${FINALRPT}
     cat ${ERRORSRPT} >> ${FINALRPT}
     echo "-- END" >> ${FINALRPT}
     echo "" >> ${FINALRPT}
 
-    echo "-- BEGIN - Ingnoring POC / SAMPLE Databases" >> ${FINALRPT}
+    echo "-- BEGIN - Ingnoring Test Databases" >> ${FINALRPT}
     echo "---------------------------------------------------------------" >> ${FINALRPT}
     cat ${IGNORERPT} >> ${FINALRPT}
     echo "-- END" >> ${FINALRPT}

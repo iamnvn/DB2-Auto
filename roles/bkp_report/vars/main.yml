@@ -1,7 +1,7 @@
 ---
 scripttorun: db2_backup_report.sh
-targethost: all
-logsdir: /db/exp/ansible/logs
+target_server: all
+logsdir: /igs_swdepot/igs/MidrangeDBAServices/DB2/bkp_reports
 dbname: all
 reportdays: 10
 mailto: nvnckmr@gmail.com

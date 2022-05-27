@@ -105,8 +105,8 @@ function cleanup2 {
 }
 
 function get_bkp_inprogress {
-    $(db2 list utilities | grep -i backup | wc -l) > ${LOGSDIR}/temp/utl.txt
-    if [[ $(db2 list utilities | grep -i backup | wc -l) -gt 0 ]]; then
+    UTILS=$(db2 list utilities | grep -i backup | wc -l)
+    if [[ ${UTILS} -gt 0 ]]; then
         if [[ "${HVERSION}" == "AIX" ]]; then
             db2 list utilities | grep -ip ID > ${LOGSDIR}/temp/${DB2INST}_listutl.txt
             echo "Info: Get Backups In Progress"

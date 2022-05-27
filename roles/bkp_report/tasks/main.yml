@@ -3,7 +3,7 @@
       run_once: true
       tags: always
 
-    - local_action: command= perl -p -i -e 's/\r//g' {{ logsdir }}/{{ scripttorun }}
+    - local_action: shell perl -p -i -e 's/\r//g' {{ scripttorun }}
       become: false
 
     - name: Get db2 instances
@@ -21,16 +21,9 @@
       template: src="{{ scripttorun }}" dest="{{ logsdir }}/{{ scripttorun }}" mode=0755
       tags: copy
 
-    - command: date +'%Y%m%d%H%M%S'
-      register: timestamp 
-    
-    - set_fact:
-        curtmstmp: "{{ timestamp.stdout }}"
-        finalreport: "{{ logsdir }}/finalreport_{{ timestamp.stdout }}.txt"
-
     - name: "Run - Script - \"{{ scripttorun }}\""
       shell: |
-             perl -p -i -e 's/\r//g' {{ logsdir }}/{{ scripttorun }}
+             #perl -p -i -e 's/\r//g' {{ logsdir }}/{{ scripttorun }}
              {{ logsdir }}/{{ scripttorun }}
       register: cmdout
       failed_when: cmdout.rc > 1
@@ -38,6 +31,13 @@
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
       tags: run
+
+    - command: date +'%Y%m%d%H%M%S'
+      register: timestamp 
+    
+    - set_fact:
+        curtmstmp: "{{ timestamp.stdout }}"
+        finalreport: "{{ logsdir }}/finalreport_{{ timestamp.stdout }}.txt"
 
     - name: Consolidate single report to mail
       shell: |
@@ -84,13 +84,18 @@
               cat ${LOGSDIR}/temp/daily_report_*.ignore >> ${FINALRPT}
               echo "-- END" >> ${FINALRPT}
               echo "" >> ${FINALRPT}
-              mail -s "Backup Report" ${MAILTO} < ${FINALRPT}
-              #cat ${FINALRPT}
+              #mail -s "Backup Report" ${MAILTO} < ${FINALRPT}
+              cat ${FINALRPT}
+      register: shellout
       ignore_errors: true
       run_once: true
       tags: genreport
 
+    - name: Final Output
+      debug: msg="{{ shellout.stdout_lines}}"
+      run_once: true
+      tags: finalout
+
     - name: Remove - Script from target
       file: path="{{ logsdir }}/{{ scripttorun }}" state=absent
       tags: remove
-

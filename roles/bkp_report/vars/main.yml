@@ -4,4 +4,5 @@ targethost: all
 logsdir: /db/exp/ansible/logs
 dbname: all
 reportdays: 10
+mailto: nvnckmr@gmail.com
 tgtenv: purescale

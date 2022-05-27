@@ -5,12 +5,7 @@
 
     - name: Get db2 instances
       shell: |
-              DB2INST="{{ db2inst }}"
-              if [[ "${DB2INST}" == "all" ]]; then
-                /usr/local/bin/db2ls |  tail -n +4 | awk '{print $1}' |while read inst; do $inst/instance/db2ilist; done > /tmp/db2ilist.lst
-              else
-                echo "${DB2INST}" > /tmp/db2ilist.lst;
-              fi
+              /usr/local/bin/db2ls |  tail -n +4 | awk '{print $1}' |while read inst; do $inst/instance/db2ilist; done > /tmp/db2ilist.lst
               cat /tmp/db2ilist.lst | grep -v db2cln
       register: db2ilist
       tags: always
@@ -25,15 +20,79 @@
     
     - set_fact:
         curtmstmp: "{{ timestamp.stdout }}"
+        finalreport: "{{ logsdir }}/finalreport_{{ timestamp.stdout }}.txt"
 
     - name: "Run - Script - \"{{ scripttorun }}\""
       shell: |
-             perl -p -i -e 's/\r//g' {{ logsdir }}/{{ script }}
-             {{ logsdir }}/{{ script }} >> {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
-             chmod -f 777 {{ logsdir }}/{{ script }}_out_{{ curtmstmp }}.txt
+             perl -p -i -e 's/\r//g' {{ logsdir }}/{{ scripttorun }}
+             {{ logsdir }}/{{ scripttorun }}
       register: cmdout
       failed_when: cmdout.rc > 1
       become: true
       become_user: "{{ item }}"
       loop: "{{ db2ilist.stdout_lines }}"
       tags: run
+
+    - name: Consolidate single report to mail
+      shell: |
+              FINALRPT="{{ finalreport }}"
+              LOGSDIR="{{ logsdir }}"
+
+              echo "======================================================================" >> ${FINALRPT}
+              echo "         Daily Report Generated on - $(date)                          " >> ${FINALRPT}
+              echo "======================================================================" >> ${FINALRPT}
+              echo "" >> ${FINALRPT}
+              echo "-- BEGIN - Backups In Progress" >> ${FINALRPT}
+              echo "---------------------------------------------------------------" >> ${FINALRPT}
+              cat ${LOGSDIR}/temp/daily_report_*.inprgrs >> ${FINALRPT}
+              echo "-- END" >> ${FINALRPT}
+              echo "" >> ${FINALRPT}
+
+              echo "-- BEGIN - No Full Backups or Failed Full Backups (Take Action)" >> ${FINALRPT}
+              echo "---------------------------------------------------------------" >> ${FINALRPT}
+              cat ${LOGSDIR}/temp/daily_report_*.action | grep -i full >> ${FINALRPT}
+              echo "-- END" >> ${FINALRPT}
+              echo "" >> ${FINALRPT}
+
+              echo "-- BEGIN - No Incremental Backups or Failed Incremental Backups (Take Action)" >> ${FINALRPT}
+              echo "---------------------------------------------------------------" >> ${FINALRPT}
+              cat ${LOGSDIR}/temp/daily_report_*.action | grep -i incremental >> ${FINALRPT}
+              echo "-- END" >> ${FINALRPT}
+              echo "" >> ${FINALRPT}
+
+              echo "-- BEGIN - Standby Report (No Action neeed)" >> ${FINALRPT}
+              echo "---------------------------------------------------------------" >> ${FINALRPT}
+              cat ${LOGSDIR}/temp/daily_report_*.standby >> ${FINALRPT}
+              echo "-- END" >> ${FINALRPT}
+              echo "" >> ${FINALRPT}
+
+              echo "-- BEGIN - Error, Unable to connect or Instance not running (Take Action)" >> ${FINALRPT}
+              echo "-------------------------------------------------------------------------" >> ${FINALRPT}
+              cat ${LOGSDIR}/temp/daily_report_*.err >> ${FINALRPT}
+              echo "-- END" >> ${FINALRPT}
+              echo "" >> ${FINALRPT}
+
+              echo "-- BEGIN - Ingnoring POC / SAMPLE Databases" >> ${FINALRPT}
+              echo "---------------------------------------------------------------" >> ${FINALRPT}
+              cat ${LOGSDIR}/temp/daily_report_*.ignore} >> ${FINALRPT}
+              echo "-- END" >> ${FINALRPT}
+              echo "" >> ${FINALRPT}
+              cat ${FINALRPT}
+      register: finalreport
+      run_once: true
+      tags: genreport
+
+    - name: Sending mail
+      mail:
+        subject: DB2 LUW - Daily Backup Report 
+        body: "{{ finalreport.stdout_lines }}"
+        #from: jane@example.net (Jane Jolie)
+        to: "{{ mailto }}"
+        #cc: Charlie Root <root@localhost>
+        attach: "{{ finalreport }}"
+        charset: utf8
+      run_once: true
+      become: false
+      #delegate_to: localhost
+      tags: sendmail
+

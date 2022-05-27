@@ -38,14 +38,14 @@ function get_vars {
     DB2INST=$(whoami)
     
 
-    FINALRPT=${LOGSDIR}/daily_report_${DB2INST}.all
-    ERRORSRPT=${LOGSDIR}/temp/daily_report_${DB2INST}.err
-    ACTIONSRPT=${LOGSDIR}/temp/daily_report_${DB2INST}.action
-    INPROGRESRPT=${LOGSDIR}/temp/daily_report_${DB2INST}.inprgrs
-    FULLBKPSRPT=${LOGSDIR}/temp/daily_report_full_${DB2INST}.bkps
-    INCBKPSRPT=${LOGSDIR}/temp/daily_report_inc_${DB2INST}.bkps
-    STANDBYRPT=${LOGSDIR}/temp/daily_report_${DB2INST}.standby
-    IGNORERPT=${LOGSDIR}/temp/daily_report_${DB2INST}.ignore
+    FINALRPT=${LOGSDIR}/daily_report_${DB2INST}_${HNAME}.all
+    ERRORSRPT=${LOGSDIR}/temp/daily_report_${DB2INST}_${HNAME}.err
+    ACTIONSRPT=${LOGSDIR}/temp/daily_report_${DB2INST}_${HNAME}.action
+    INPROGRESRPT=${LOGSDIR}/temp/daily_report_${DB2INST}_${HNAME}.inprgrs
+    FULLBKPSRPT=${LOGSDIR}/temp/daily_report_full_${DB2INST}_${HNAME}.bkps
+    INCBKPSRPT=${LOGSDIR}/temp/daily_report_inc_${DB2INST}_${HNAME}.bkps
+    STANDBYRPT=${LOGSDIR}/temp/daily_report_${DB2INST}_${HNAME}.standby
+    IGNORERPT=${LOGSDIR}/temp/daily_report_${DB2INST}_${HNAME}.ignore
 }
 
 function profile_db2 {
@@ -105,14 +105,24 @@ function cleanup2 {
 }
 
 function get_bkp_inprogress {
-    db2 list utilities | grep -A6 ID > ${LOGSDIR}/temp/${DB2INST}_listutl.txt
-    if [[ $(grep -c 'BACKUP' ${LOGSDIR}/temp/${DB2INST}_listutl.txt) -gt 0 ]]; then
-        echo "Info: Get Backups In Progress"
-        cat ${LOGSDIR}/temp/${DB2INST}_listutl.txt | grep -i "Database Name" | cut -d "=" -f2 | awk '{print $1}' | while read DBNAME
-        do
-            BKPSTARTTIME=$(cat ${LOGSDIR}/temp/${DB2INST}_listutl.txt | grep -A3 ${DBNAME} | grep -i "Start Time" | cut -d "=" -f2 | cut -d "." -f1 | sed 's/^ //g')
-            echo "${HNAME}_${DB2INST}_${DBNAME} => BackupInProgress - StartTime: ${BKPSTARTTIME}" >> ${INPROGRESRPT}
-        done
+    if [[ $(db2 list utilities | grep -i backup | wc -l) -gt 0 ]]; then
+        if [[ "${HVERSION}" == "AIX" ]]; then
+            db2 list utilities | grep -ip ID > ${LOGSDIR}/temp/${DB2INST}_listutl.txt
+            echo "Info: Get Backups In Progress"
+            cat ${LOGSDIR}/temp/${DB2INST}_listutl.txt | grep -i "Database Name" | cut -d "=" -f2 | awk '{print $1}' | while read DBNAME
+            do
+                BKPSTARTTIME=$(cat ${LOGSDIR}/temp/${DB2INST}_listutl.txt | grep -ip ${DBNAME} | grep -i "Start Time" | cut -d "=" -f2 | cut -d "." -f1 | sed 's/^ //g')
+                echo "${HNAME}_${DB2INST}_${DBNAME} => BackupInProgress - StartTime: ${BKPSTARTTIME}" >> ${INPROGRESRPT}
+            done
+        elif [[ "${HVERSION}" == "Linux" ]]; then
+            db2 list utilities | grep -A6 ID > ${LOGSDIR}/temp/${DB2INST}_listutl.txt
+            echo "Info: Get Backups In Progress"
+            cat ${LOGSDIR}/temp/${DB2INST}_listutl.txt | grep -i "Database Name" | cut -d "=" -f2 | awk '{print $1}' | while read DBNAME
+            do
+                BKPSTARTTIME=$(cat ${LOGSDIR}/temp/${DB2INST}_listutl.txt | grep -A3 ${DBNAME} | grep -i "Start Time" | cut -d "=" -f2 | cut -d "." -f1 | sed 's/^ //g')
+                echo "${HNAME}_${DB2INST}_${DBNAME} => BackupInProgress - StartTime: ${BKPSTARTTIME}" >> ${INPROGRESRPT}
+            done
+        fi
     fi
 }
 
@@ -283,7 +293,7 @@ function run_bkp_report {
                         if [[ -s ${INCBKPSRPT} || $(grep -c '${DBNAME}' ${INCBKPSRPT}) -eq 0 ]]; then
                             latest_bkp_info_sql i >> /tmp/${DB2INST}_inc_latestbkp.txt
                         fi
-                        if [[ "$(echo ${TGTENV} | tr A-Z a-z)" == "purescale" ]]; then
+                        if [[ "${TGTENV}" == "PURESCALE" ]]; then
                             latest_bkp_info_sql >> /tmp/${DB2INST}_purescale_latestbkp.txt
                         fi
                     else
@@ -368,7 +378,7 @@ function disiplay_report {
 
     echo "-- BEGIN - Standby Report (No Action neeed)" >> ${FINALRPT}
     echo "---------------------------------------------------------------" >> ${FINALRPT}
-    ${STANDBYRPT} >> ${FINALRPT}
+    cat ${STANDBYRPT} >> ${FINALRPT}
     echo "-- END" >> ${FINALRPT}
     echo "" >> ${FINALRPT}
 

@@ -3,10 +3,10 @@
 ##  Do not change below values until really needed   ##
 #######################################################
 
-dirstocreate:
-    - "{{ tgtdir }}"
-    - "{{ tgtdir }}/logs"
-    - "{{ tgtdir }}/scripts"
+#dirstocreate:
+#    - "{{ tgtdir }}"
+#    - "{{ tgtdir }}/logs"
+#    - "{{ tgtdir }}/scripts"
 
 scriptstocopy:
     - start_db2.sh
@@ -17,5 +17,5 @@ valscripts:
     - db2_val.sh
     - validateHADRTSA.sh
 
-scriptsdir: "{{ tgtdir }}/scripts"
-logsdir: "{{ tgtdir }}/logs"
+#scriptsdir: "{{ tgtdir }}/scripts"
+#logsdir: "{{ tgtdir }}/logs"

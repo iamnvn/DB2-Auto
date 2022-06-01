@@ -2,6 +2,21 @@
     - debug: msg="Play_hosts={{play_hosts}}"
       run_once: true
 
+    - stat: path="/db/exp/"
+      register: logfs
+
+    - set_fact:
+        tgtdir: "/tmp/ansible/stopstart"
+      when: logfs.stat.exists == false
+
+    - set_fact:
+        dirstocreate:
+            - "{{ tgtdir }}"
+            - "{{ tgtdir }}/logs"
+            - "{{ tgtdir }}/scripts"
+        scriptsdir: "{{ tgtdir }}/scripts"
+        logsdir: "{{ tgtdir }}/logs"          
+
     - name: Create - Directory Structure
       shell: |
               DIR="{{ item }}"
@@ -17,6 +32,17 @@
       loop: "{{ dirstocreate }}"
       tags: createdirs
 
+    - name: Remove special chars before copy
+      shell: |
+              perl -p -i -e 's/\r//g' {{ item }}
+      with_items: 
+          - include_db2.sh
+          - "{{ scriptstocopy }}"
+          - "{{ valscripts }}"
+      become: false
+      delegate_to: localhost
+      tags: always
+      
     - name: Copy - Comman functions and variables file
       template: src=templates/include_db2.sh dest=/tmp/include_db2 mode=0777
       when: dbaction != "status"

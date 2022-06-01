@@ -4,7 +4,11 @@ TGTDIR="{{ tgtdir }}"
 HNAME=$(hostname -s)
 HVERSION=$(uname -s)
 
-LOGDIR=${TGTDIR}/logs
+if [[ ! -d "/db/exp" ]]; then
+  LOGDIR=/tmp/ansible/stopstart/logs
+else
+  LOGDIR=${TGTDIR}/logs
+fi
 #SCRIPTSDIR=${TGTDIR}/scripts
 #STEPSDIR=${TGTDIR}/steps
 
@@ -91,27 +95,36 @@ function activatedb {
 
 function db_hadr {
 
-	STANDBYCOUNT=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST | wc -l | awk '{print $1}')
-	DBCONNOP=$(db2 -ec +o connect to ${DBNAME})
-	DBROLE=$(db2pd -db ${DBNAME} -hadr | grep HADR_ROLE | awk '{print $3}' | head -1)
-	DBHADRSTATE=$(db2pd -db ${DBNAME} -hadr | grep HADR_STATE | awk '{print $3}' | head -1)
-	DBHADRCONNSTATUS=$(db2pd -db ${DBNAME} -hadr | grep HADR_CONNECT_STATUS  | awk '{print $3}' | head -1)
-	DBPRIMLOG=$(db2pd -db ${DBNAME} -hadr | grep PRIMARY_LOG_FILE | awk '{print $3 $4 $5}')
-	DBSTBYLOG=$(db2pd -db ${DBNAME} -hadr | grep STANDBY_LOG_FILE | awk '{print $3 $4 $5}')
-	DBPRIMARYHOST=$(db2pd -db ${DBNAME} -hadr | grep -i PRIMARY_MEMBER_HOST | head -1 | awk '{print $3}')
-	DBSTDBYHOST=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -1 | awk '{print $3}')
+	  DBROLE=$(db2 get db cfg for ${DBNAME} | grep -i "HADR database role" | cut -d "=" -f2 | awk '{print $1}'s)
 
-	if [[ ${STANDBYCOUNT} -eq 3 ]]; then
-		DBSTDBYHOST2=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -2 | tail -1 | awk '{print $3}')
-		DBSTDBYHOST3=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | tail -1 | awk '{print $3}')
-	elif [[ ${STANDBYCOUNT} -eq 2 ]]; then
-		DBSTDBYHOST2=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -2 | tail -1 | awk '{print $3}')
-		DBSTDBYHOST3=""
-	else
-		DBSTDBYHOST2=""
-		DBSTDBYHOST3=""
-	fi
-}
+    if [[ "${DBROLE}" == "STANDARD" ]]; then
+      DBROLE=STANDARD
+      DBHADRSTATE=NA
+			DBHADRCONNSTATUS=NA
+			DBSTDBYHOST=NA
+			DBPRIMARYHOST=NA
+    elif [[ "${DBROLE}" == "PRIMARY" || "${DBROLE}" == "STANDBY" ]]; then
+      STANDBYCOUNT=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST | wc -l | awk '{print $1}')
+		  DBCONNOP=$(db2 -ec +o connect to ${DBNAME})
+		  #DBROLE=$(db2pd -db ${DBNAME} -hadr | grep HADR_ROLE | awk '{print $3}' | head -1)
+      DBROLE=${DBROLE}
+		  DBHADRSTATE=$(db2pd -db ${DBNAME} -hadr | grep HADR_STATE | awk '{print $3}' | head -1)
+		  DBHADRCONNSTATUS=$(db2pd -db ${DBNAME} -hadr | grep HADR_CONNECT_STATUS  | awk '{print $3}' | head -1)
+      DBPRIMARYHOST=$(db2pd -db ${DBNAME} -hadr | grep -i PRIMARY_MEMBER_HOST | head -1 | awk '{print $3}')
+		  DBSTDBYHOST=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -1 | awk '{print $3}')
+
+		  if [[ ${STANDBYCOUNT} -eq 3 ]]; then
+			  DBSTDBYHOST2=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -2 | tail -1 | awk '{print $3}')
+			  DBSTDBYHOST3=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | tail -1 | awk '{print $3}')
+		  elif [[ ${STANDBYCOUNT} -eq 2 ]]; then
+  			DBSTDBYHOST2=$(db2pd -db ${DBNAME} -hadr | grep -i STANDBY_MEMBER_HOST  | head -2 | tail -1 | awk '{print $3}')
+	  		DBSTDBYHOST3=""
+		  else
+			DBSTDBYHOST2=""
+			DBSTDBYHOST3=""
+		  fi
+    fi
+  }
 
 function tsacluster {
   lssam > /tmp/lssam.out 2>&1
